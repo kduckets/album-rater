@@ -46,16 +46,17 @@ export function AlbumGridCard({ album, allAlbums }: { album: Album; allAlbums: A
           </div>
         )}
 
-        {/* User star rating */}
-        {rating > 0 && (
-          <div className="absolute bottom-1 left-1 flex gap-px">
-            {[1, 2, 3, 4, 5].map((s) => (
-              <span key={s} className={`text-[7px] leading-none ${rating >= s ? "text-amber-400" : "text-white/20"}`}>
-                ★
-              </span>
-            ))}
-          </div>
-        )}
+        {/* Rating bar — 5 segments, always present, amber when rated */}
+        <div className="absolute bottom-0 left-0 right-0 flex gap-px p-px">
+          {[1, 2, 3, 4, 5].map((s) => (
+            <div
+              key={s}
+              className={`flex-1 h-0.75 rounded-sm transition-colors ${
+                rating >= s ? "bg-amber-400/90" : "bg-white/10"
+              }`}
+            />
+          ))}
+        </div>
 
         {/* Hover overlay */}
         <div className="absolute inset-0 bg-linear-to-t from-black/90 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-2 pointer-events-none">
