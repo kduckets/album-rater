@@ -139,7 +139,17 @@ export function GifModal({ album, allAlbums, onClose }: GifModalProps) {
         {/* ── Right: details panel ── */}
         <div className="flex-1 bg-black text-white flex flex-col overflow-hidden">
 
-          <div className="flex justify-end px-5 pt-4 pb-1 shrink-0">
+          {/* Header — matches main app header, visible on all sizes */}
+          <div className="flex items-center justify-between px-5 py-3 border-b border-zinc-900 shrink-0">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 overflow-hidden shrink-0">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/flockify.png" alt="Flockify420" className="h-8 w-auto invert" style={{ maxWidth: "none" }} />
+              </div>
+              <span className="text-white font-bold text-sm tracking-wide">
+                Flockify<span className="text-zinc-500 font-normal text-xs ml-0.5">4.2.0</span>
+              </span>
+            </div>
             <button
               onClick={onClose}
               className="text-zinc-600 hover:text-white transition-colors cursor-pointer text-lg leading-none"
