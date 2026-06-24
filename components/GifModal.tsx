@@ -12,6 +12,7 @@ interface GifModalProps {
 }
 
 const FALLBACK_IMG = "/miles-davis.png";
+const EMPTY_COMMENTS: import("@/types").GifComment[] = [];
 
 function timeAgo(ts: number) {
   const s = Math.floor((Date.now() - ts) / 1000);
@@ -38,7 +39,7 @@ export function GifModal({ album, allAlbums, onClose }: GifModalProps) {
   const backdropRef = useRef<HTMLDivElement>(null);
   const inputRef    = useRef<HTMLInputElement>(null);
 
-  const comments     = useAlbumStore((s) => s.comments[album.id] ?? []);
+  const comments     = useAlbumStore((s) => s.comments[album.id] ?? EMPTY_COMMENTS);
   const addComment   = useAlbumStore((s) => s.addComment);
   const removeComment = useAlbumStore((s) => s.removeComment);
   const rating       = useAlbumStore((s) => s.ratings[album.id] ?? 0);
