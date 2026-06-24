@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { AlbumListCard } from "./AlbumListCard";
 import { AlbumGridCard } from "./AlbumGridCard";
 import { useAlbumStore } from "@/store/albumStore";
@@ -60,6 +60,9 @@ export function Feed({ batches, allDiscography }: FeedProps) {
   const [sortOrder, setSortOrder]       = useState<SortOrder>("new");
   const [labelFilter, setLabelFilter]   = useState<LabelFilter>("all");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
+  const [searchOpen, setSearchOpen]     = useState(false);
+  const [searchQuery, setSearchQuery]   = useState("");
+  const searchRef                       = useRef<HTMLInputElement>(null);
 
   const ratings  = useAlbumStore((s) => s.ratings);
   const comments = useAlbumStore((s) => s.comments);
@@ -75,11 +78,16 @@ export function Feed({ batches, allDiscography }: FeedProps) {
     fetchAverages(gridSource.map((a) => a.id));
   }, [gridSource, fetchAverages]);
 
+  const searchLower = searchQuery.trim().toLowerCase();
+
   // Classic view: reviewed studio albums only
   const filteredAndSorted = useMemo(() => {
-    const filtered = batch.albums.filter((a) =>
-      !!a.description && (eraFilter === "all" ? true : a.year > 0 && getEra(a.year) === eraFilter)
-    );
+    const filtered = batch.albums.filter((a) => {
+      if (!a.description) return false;
+      if (eraFilter !== "all" && !(a.year > 0 && getEra(a.year) === eraFilter)) return false;
+      if (searchLower && !a.title.toLowerCase().includes(searchLower) && !(a.description ?? "").toLowerCase().includes(searchLower)) return false;
+      return true;
+    });
     return [...filtered].sort((a, b) => {
       switch (sortOrder) {
         case "new":      return b.year - a.year;
@@ -87,11 +95,15 @@ export function Feed({ batches, allDiscography }: FeedProps) {
         case "comments": return (lastCommentAt[b.id] ?? 0) - (lastCommentAt[a.id] ?? 0);
       }
     });
-  }, [batch.albums, eraFilter, sortOrder, averages, lastCommentAt]);
+  }, [batch.albums, eraFilter, sortOrder, averages, lastCommentAt, searchLower]);
 
   // Grid view: reviewed albums only, with extra filters
   const gridAlbums = useMemo(() => {
-    let list = gridSource.filter((a) => !!a.description);
+    let list = gridSource.filter((a) => {
+      if (!a.description) return false;
+      if (searchLower && !a.title.toLowerCase().includes(searchLower) && !(a.description ?? "").toLowerCase().includes(searchLower)) return false;
+      return true;
+    });
     if (eraFilter !== "all")
       list = list.filter((a) => a.year > 0 && getEra(a.year) === eraFilter);
     if (labelFilter !== "all")
@@ -107,7 +119,7 @@ export function Feed({ batches, allDiscography }: FeedProps) {
         case "comments": return (lastCommentAt[b.id] ?? 0) - (lastCommentAt[a.id] ?? 0);
       }
     });
-  }, [gridSource, eraFilter, labelFilter, statusFilter, sortOrder, averages, lastCommentAt, ratings]);
+  }, [gridSource, eraFilter, labelFilter, statusFilter, sortOrder, averages, lastCommentAt, ratings, searchLower]);
 
   const ratedCount = batch.albums.filter((a) => ratings[a.id]).length;
   const totalGifs  = Object.values(comments).reduce((n, arr) => n + arr.length, 0);
@@ -164,6 +176,22 @@ export function Feed({ batches, allDiscography }: FeedProps) {
         ))}
         <div className="ml-auto pr-3 flex items-center gap-0.5">
           <button
+            onClick={() => {
+              const next = !searchOpen;
+              setSearchOpen(next);
+              if (!next) setSearchQuery("");
+              else setTimeout(() => searchRef.current?.focus(), 50);
+            }}
+            title="Search"
+            aria-label="Search"
+            className={`p-1.5 rounded transition-colors cursor-pointer ${searchOpen ? "text-white" : "text-zinc-600 hover:text-zinc-400"}`}
+          >
+            {searchOpen
+              ? <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              : <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+            }
+          </button>
+          <button
             onClick={() => setViewMode("classic")}
             title="Classic"
             aria-label="Classic view"
@@ -188,6 +216,21 @@ export function Feed({ batches, allDiscography }: FeedProps) {
           </button>
         </div>
       </div>
+
+      {/* Search bar */}
+      {searchOpen && (
+        <div className="border-b border-zinc-900 px-4 py-2.5">
+          <input
+            ref={searchRef}
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            onKeyDown={(e) => e.key === "Escape" && (setSearchOpen(false), setSearchQuery(""))}
+            placeholder="Search albums and descriptions…"
+            className="w-full bg-transparent text-sm text-white placeholder:text-zinc-600 focus:outline-none"
+          />
+        </div>
+      )}
 
       {/* Grid-only filter chips */}
       {viewMode === "grid" && (
