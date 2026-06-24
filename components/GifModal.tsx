@@ -57,10 +57,29 @@ export function GifModal({ album, allAlbums, onClose }: GifModalProps) {
   const setRating  = useAlbumStore((s) => s.setRating);
   const setCommentCount   = useAveragesStore((s) => s.setCommentCount);
   const setLastCommentAt  = useAveragesStore((s) => s.setLastCommentAt);
+  const setAverage        = useAveragesStore((s) => s.setAverage);
 
   const visitorId     = getEffectiveUserId();
   const spotifyUrl    = `https://open.spotify.com/search/${encodeURIComponent(`${album.title} Miles Davis`)}`;
   const appleMusicUrl = `https://music.apple.com/search?term=${encodeURIComponent(`${album.title} Miles Davis`)}`;
+
+  // Persist rating changes to Redis
+  const prevRating = useRef<number | null>(null);
+  useEffect(() => {
+    if (prevRating.current === null) { prevRating.current = rating; return; }
+    if (prevRating.current === rating) return;
+    prevRating.current = rating;
+    const userId = getEffectiveUserId();
+    if (!userId) return;
+    fetch("/api/rate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ albumId: album.id, userId, rating }),
+    })
+      .then((r) => r.json())
+      .then((data) => { if (typeof data.average === "number") setAverage(album.id, data.average); })
+      .catch(() => {});
+  }, [rating, album.id, setAverage]);
 
   // Fetch comments from server on mount
   useEffect(() => {
@@ -75,8 +94,7 @@ export function GifModal({ album, allAlbums, onClose }: GifModalProps) {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
     document.addEventListener("keydown", onKey);
-    document.body.style.overflow = "hidden";
-    return () => { document.removeEventListener("keydown", onKey); document.body.style.overflow = ""; };
+    return () => { document.removeEventListener("keydown", onKey); };
   }, [onClose]);
 
   useEffect(() => { if (addMode === "search") searchRef.current?.focus(); }, [addMode]);
@@ -187,13 +205,13 @@ export function GifModal({ album, allAlbums, onClose }: GifModalProps) {
   return (
     <div
       ref={backdropRef}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm overflow-x-hidden"
+      className="fixed inset-0 z-50 bg-black/90 backdrop-blur-sm overflow-x-hidden overflow-y-auto sm:flex sm:items-center sm:justify-center"
       onClick={(e) => { if (e.target === backdropRef.current) onClose(); }}
     >
-      <div className="flex flex-col w-full h-full max-w-5xl max-h-[96vh] mx-auto rounded-lg overflow-hidden shadow-2xl">
+      <div className="flex flex-col w-full sm:h-full sm:max-h-[96vh] max-w-5xl mx-auto sm:rounded-lg sm:overflow-hidden shadow-2xl">
 
         {/* ── Header: always at top, full width ── */}
-        <div className="flex items-center justify-between px-5 py-3 border-b border-zinc-900 shrink-0 bg-black">
+        <div className="sticky top-0 z-10 flex items-center justify-between px-5 py-3 border-b border-zinc-900 shrink-0 bg-black">
           <button
             onClick={onClose}
             className="flex items-center gap-2 cursor-pointer group"
@@ -225,7 +243,7 @@ export function GifModal({ album, allAlbums, onClose }: GifModalProps) {
         </div>
 
         {/* ── Body: art + details ── */}
-        <div className="flex flex-col sm:flex-row flex-1 overflow-hidden min-h-0">
+        <div className="flex flex-col sm:flex-row sm:flex-1 sm:overflow-hidden sm:min-h-0">
 
           {/* Album art */}
           <div className="relative w-full aspect-square sm:w-[42%] shrink-0 bg-black sm:self-start">
@@ -240,8 +258,8 @@ export function GifModal({ album, allAlbums, onClose }: GifModalProps) {
           </div>
 
           {/* Details panel */}
-          <div className="flex-1 bg-black text-white flex flex-col overflow-hidden min-h-0">
-            <div className="flex-1 overflow-y-auto px-6 pt-4 pb-8 space-y-5">
+          <div className="flex-1 bg-black text-white flex flex-col sm:overflow-hidden sm:min-h-0">
+            <div className="sm:flex-1 sm:overflow-y-auto px-6 pt-4 pb-8 space-y-5">
 
               {/* Title + meta */}
               <div>

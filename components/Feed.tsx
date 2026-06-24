@@ -23,7 +23,6 @@ const ERA_TABS: { label: string; value: EraFilter }[] = [
 ];
 
 const SORT_TABS: { label: string; value: SortOrder }[] = [
-  { label: "CHRON",    value: "stars"    },
   { label: "NEW",      value: "new"      },
   { label: "TOP",      value: "top"      },
   { label: "COMMENTS", value: "comments" },
@@ -86,7 +85,6 @@ export function Feed({ batches, allDiscography }: FeedProps) {
         case "new":      return b.year - a.year;
         case "top":      return (averages[b.id] ?? 0) - (averages[a.id] ?? 0);
         case "comments": return (lastCommentAt[b.id] ?? 0) - (lastCommentAt[a.id] ?? 0);
-        case "stars":    return a.year - b.year;
       }
     });
   }, [batch.albums, eraFilter, sortOrder, averages, lastCommentAt]);
@@ -107,7 +105,6 @@ export function Feed({ batches, allDiscography }: FeedProps) {
         case "new":      return b.year - a.year;
         case "top":      return (averages[b.id] ?? 0) - (averages[a.id] ?? 0);
         case "comments": return (lastCommentAt[b.id] ?? 0) - (lastCommentAt[a.id] ?? 0);
-        case "stars":    return a.year - b.year;
       }
     });
   }, [gridSource, eraFilter, labelFilter, statusFilter, sortOrder, averages, lastCommentAt, ratings]);

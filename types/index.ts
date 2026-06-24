@@ -27,6 +27,6 @@ export interface GifComment {
   visitorId: string   // owner identifier
 }
 
-export type SortOrder  = 'new' | 'top' | 'comments' | 'stars'
+export type SortOrder  = 'new' | 'top' | 'comments'
 export type EraFilter  = 'all' | '50s' | '60s' | '70s' | '80s' | '90s' | '2000s+'
 export type TypeFilter = 'all' | 'studio' | 'live' | 'compilation'
