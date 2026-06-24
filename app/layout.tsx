@@ -13,8 +13,22 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Flockify",
+  title: {
+    default: "Flockify420",
+    template: "%s | Flockify420",
+  },
   description: "Rate music albums and react with GIFs",
+  openGraph: {
+    title: "Flockify420",
+    description: "Rate music albums and react with GIFs",
+    siteName: "Flockify420",
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: "Flockify420",
+    description: "Rate music albums and react with GIFs",
+  },
 };
 
 export default function RootLayout({
