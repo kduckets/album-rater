@@ -116,14 +116,14 @@ export function GifModal({ album, allAlbums, onClose }: GifModalProps) {
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm"
       onClick={(e) => { if (e.target === backdropRef.current) onClose(); }}
     >
-      <div className="flex w-full h-full max-w-5xl max-h-[96vh] mx-auto rounded-lg overflow-hidden shadow-2xl">
+      <div className="flex flex-col sm:flex-row w-full h-full max-w-5xl max-h-[96vh] mx-auto rounded-lg overflow-hidden shadow-2xl">
 
-        {/* ── Left: album art ── */}
+        {/* ── Album art: full-width on mobile (top), left column on sm+ ── */}
         <a
           href={spotifyUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="relative hidden sm:block w-[42%] shrink-0 bg-black"
+          className="relative w-full aspect-square sm:aspect-auto sm:w-[42%] shrink-0 bg-black"
           aria-label={`Listen to ${album.title} on Spotify`}
         >
           <Image
@@ -131,25 +131,29 @@ export function GifModal({ album, allAlbums, onClose }: GifModalProps) {
             alt={album.title}
             fill
             className="object-contain"
-            sizes="42vw"
+            sizes="(max-width: 640px) 100vw, 42vw"
             onError={() => setArtErr(true)}
           />
         </a>
 
         {/* ── Right: details panel ── */}
-        <div className="flex-1 bg-black text-white flex flex-col overflow-hidden">
+        <div className="flex-1 bg-black text-white flex flex-col overflow-hidden min-h-0">
 
-          {/* Header — matches main app header, visible on all sizes */}
+          {/* Header */}
           <div className="flex items-center justify-between px-5 py-3 border-b border-zinc-900 shrink-0">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 overflow-hidden shrink-0">
+            <button
+              onClick={onClose}
+              className="flex items-center gap-2 cursor-pointer group"
+              aria-label="Back to feed"
+            >
+              <div className="w-8 h-8 overflow-hidden shrink-0 opacity-90 group-hover:opacity-100 transition-opacity">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src="/flockify.png" alt="Flockify420" className="h-8 w-auto invert" style={{ maxWidth: "none" }} />
               </div>
               <span className="text-white font-bold text-sm tracking-wide">
                 Flockify<span className="text-zinc-500 font-normal text-xs ml-0.5">4.2.0</span>
               </span>
-            </div>
+            </button>
             <button
               onClick={onClose}
               className="text-zinc-600 hover:text-white transition-colors cursor-pointer text-lg leading-none"
