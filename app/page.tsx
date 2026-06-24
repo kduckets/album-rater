@@ -1,5 +1,4 @@
 import { Feed } from "@/components/Feed";
-import Image from "next/image";
 import { MILES_DAVIS_DISCOGRAPHY } from "@/data/milesDavisDiscography";
 import type { Batch } from "@/types";
 
@@ -123,13 +122,13 @@ export default async function Home() {
       {/* Header */}
       <header className="flex items-center justify-between px-5 py-3 border-b border-zinc-900">
         <div className="flex items-center gap-2">
-          <div className="relative w-8 h-8 shrink-0">
-            <Image
+          <div className="relative w-8 h-8 shrink-0 overflow-hidden">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
               src="/flockify.png"
               alt="Flockify420 logo"
-              fill
-              className="object-cover object-left invert"
-              sizes="32px"
+              className="h-8 w-auto invert"
+              style={{ maxWidth: "none" }}
             />
             <span className="absolute bottom-0 right-0 text-[6px] text-white/40 font-mono leading-none">420</span>
           </div>
