@@ -17,14 +17,14 @@ export const metadata: Metadata = {
     default: "flockify discographies",
     template: "%s | flockify discographies",
   },
-  description: "Like Flockify, but different.",
+  description: "Like flockify, but with discographies.",
   icons: {
     icon: "/flockify-icon-only.png",
     apple: "/flockify-icon-only.png",
   },
   openGraph: {
     title: "flockify discographies",
-    description: "Like Flockify, but different.",
+    description: "Like flockify, but with discographies.",
     siteName: "flockify discographies",
     type: "website",
     images: [{ url: "/flockify-icon-only.png" }],
@@ -32,7 +32,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "flockify discographies",
-    description: "Like Flockify, but different.",
+    description: "Like flockify, but with discographies.",
     images: ["/flockify-icon-only.png"],
   },
 };
