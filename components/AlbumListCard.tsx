@@ -176,7 +176,7 @@ export function AlbumListCard({ album, allAlbums }: AlbumListCardProps) {
             </div>
 
             <p className="text-zinc-400 text-xs mt-3">
-              Miles Takes Years{album.year ? ` · ${album.year}` : ""}
+              Miles Takes Years
             </p>
             <p className="text-zinc-500 text-[11px] mt-0.5">
               posted by <span className="text-zinc-400">Johnson</span>
