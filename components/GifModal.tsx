@@ -91,8 +91,18 @@ export function GifModal({ album: initialAlbum, allAlbums, onClose }: GifModalPr
   // Persist rating changes to Redis
   const prevRating = useRef<number | null>(null);
   useEffect(() => {
+    const scrollY = window.scrollY;
+    document.body.style.position = "fixed";
+    document.body.style.top = `-${scrollY}px`;
+    document.body.style.width = "100%";
     document.body.style.overflow = "hidden";
-    return () => { document.body.style.overflow = ""; };
+    return () => {
+      document.body.style.position = "";
+      document.body.style.top = "";
+      document.body.style.width = "";
+      document.body.style.overflow = "";
+      window.scrollTo(0, scrollY);
+    };
   }, []);
 
   useEffect(() => { prevRating.current = null; }, [album.id]);
@@ -268,7 +278,7 @@ export function GifModal({ album: initialAlbum, allAlbums, onClose }: GifModalPr
   return (
     <div
       ref={backdropRef}
-      className="fixed inset-0 z-50 bg-black/90 backdrop-blur-sm overflow-x-hidden overflow-y-auto sm:flex sm:items-center sm:justify-center"
+      className="fixed inset-0 z-50 bg-black/90 backdrop-blur-sm overflow-x-hidden overflow-y-auto overscroll-contain sm:flex sm:items-center sm:justify-center"
       onClick={(e) => { if (e.target === backdropRef.current) onClose(); }}
     >
       <div className="flex flex-col w-full sm:h-full sm:max-h-[96vh] max-w-5xl mx-auto sm:rounded-lg sm:overflow-hidden shadow-2xl">
