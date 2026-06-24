@@ -79,6 +79,20 @@ export function Feed({ batches, allDiscography }: FeedProps) {
     fetchAverages(gridSource.map((a) => a.id));
   }, [gridSource, fetchAverages]);
 
+  useEffect(() => {
+    function reset() {
+      setViewMode("classic");
+      setEraFilter("all");
+      setSortOrder("new");
+      setLabelFilter("all");
+      setStatusFilter("all");
+      setSearchOpen(false);
+      setSearchQuery("");
+    }
+    window.addEventListener("reset-feed", reset);
+    return () => window.removeEventListener("reset-feed", reset);
+  }, []);
+
   const searchLower = searchQuery.trim().toLowerCase();
 
   // Classic view: reviewed studio albums only
