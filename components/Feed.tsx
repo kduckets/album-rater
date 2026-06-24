@@ -101,6 +101,9 @@ export function Feed({ batches, allDiscography }: FeedProps) {
       if (!a.description) return false;
       if (eraFilter !== "all" && !(a.year > 0 && getEra(a.year) === eraFilter)) return false;
       if (searchLower && !a.title.toLowerCase().includes(searchLower) && !(a.description ?? "").toLowerCase().includes(searchLower)) return false;
+      if (statusFilter === "rated" && !(ratings[a.id] ?? 0)) return false;
+      if (statusFilter === "unrated" && (ratings[a.id] ?? 0)) return false;
+      if (statusFilter === "saved" && !savedAlbums.includes(a.id)) return false;
       return true;
     });
     return [...filtered].sort((a, b) => {
@@ -110,7 +113,7 @@ export function Feed({ batches, allDiscography }: FeedProps) {
         case "comments": return (lastCommentAt[b.id] ?? 0) - (lastCommentAt[a.id] ?? 0);
       }
     });
-  }, [batch.albums, eraFilter, sortOrder, averages, lastCommentAt, searchLower]);
+  }, [batch.albums, eraFilter, sortOrder, averages, lastCommentAt, searchLower, statusFilter, ratings, savedAlbums]);
 
   // Grid view: reviewed albums only, with extra filters
   const gridAlbums = useMemo(() => {
@@ -165,15 +168,23 @@ export function Feed({ batches, allDiscography }: FeedProps) {
             {label}
           </button>
         ))}
-        <div className="ml-auto px-4 flex items-center gap-3 text-xs text-zinc-600 shrink-0">
+        <div className="ml-auto px-4 flex items-center gap-3 text-xs shrink-0">
           {viewMode === "classic" ? (
             <>
-              <span>{batch.albums.length} albums</span>
-              <span>{ratedCount} rated</span>
-              {totalGifs > 0 && <span>{totalGifs} GIFs</span>}
+              <button
+                onClick={() => { setEraFilter("all"); setStatusFilter("all"); }}
+                className={`cursor-pointer transition-colors hover:text-zinc-300 ${statusFilter === "all" ? "text-white" : "text-zinc-600"}`}
+              >{filteredAndSorted.length} albums</button>
+              {ratedCount > 0 && (
+                <button
+                  onClick={() => setStatusFilter(statusFilter === "rated" ? "all" : "rated")}
+                  className={`cursor-pointer transition-colors hover:text-zinc-300 ${statusFilter === "rated" ? "text-white" : "text-zinc-600"}`}
+                >{ratedCount} rated</button>
+              )}
+              {totalGifs > 0 && <span className="text-zinc-600">{totalGifs} GIFs</span>}
             </>
           ) : (
-            <span>{gridAlbums.length} of {gridSource.length}</span>
+            <span className="text-zinc-600">{gridAlbums.length} of {gridSource.length}</span>
           )}
         </div>
       </div>
