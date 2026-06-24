@@ -18,16 +18,22 @@ export const metadata: Metadata = {
     template: "%s | Flockify420",
   },
   description: "Rate music albums and react with GIFs",
+  icons: {
+    icon: "/flockify.png",
+    apple: "/flockify.png",
+  },
   openGraph: {
     title: "Flockify420",
     description: "Rate music albums and react with GIFs",
     siteName: "Flockify420",
     type: "website",
+    images: [{ url: "/flockify.png" }],
   },
   twitter: {
-    card: "summary",
+    card: "summary_large_image",
     title: "Flockify420",
     description: "Rate music albums and react with GIFs",
+    images: ["/flockify.png"],
   },
 };
 
