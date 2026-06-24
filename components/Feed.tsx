@@ -70,7 +70,7 @@ export function Feed({ batches }: FeedProps) {
       </div>
 
       {/* Era filter */}
-      <div className="flex items-center border-b border-zinc-900 overflow-x-auto">
+      <div className="flex items-center border-b border-zinc-900 overflow-x-auto overflow-y-hidden" style={{ touchAction: "pan-x" }}>
         <span className="text-zinc-700 px-3 text-sm shrink-0">▾</span>
         {ERA_TABS.map(({ label, value }) => (
           <button
