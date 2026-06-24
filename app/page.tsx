@@ -89,19 +89,35 @@ export default async function Home() {
 
   const studioAlbums = MILES_DAVIS_DISCOGRAPHY.filter((e) => e.type === "studio");
 
-  // Fetch Last.fm in parallel for albums iTunes doesn't have
+  // Fetch Last.fm in parallel for studios missing from iTunes
   const missingAlbums = studioAlbums.filter((e) => !artworkMap.has(normalizeTitle(e.title)));
   const lastFmResults = await Promise.all(
     missingAlbums.map(async (e) => ({ title: e.title, url: await fetchLastFmImage(e.title) }))
   );
   const lastFmMap = new Map(lastFmResults.filter((r) => r.url).map((r) => [r.title, r.url]));
 
+  // Studio albums (Classic view) — IDs are stable: md-{studio-index}
   const albums = studioAlbums.map((entry, i) => ({
     id: `md-${i}`,
     title: entry.title,
     year: entry.year,
     batchId: "miles-davis",
     artworkUrl: artworkMap.get(normalizeTitle(entry.title)) ?? lastFmMap.get(entry.title) ?? "",
+    label: entry.label,
+    type: entry.type,
+    description: descMap.get(`${entry.year}-${normalizeForDesc(entry.title)}`),
+  }));
+
+  // Stable ID map so studio albums share IDs in both views
+  const studioIdMap = new Map(albums.map((a) => [a.title, a.id]));
+
+  // Full discography (Grid view) — uses same IDs for studio, new IDs for live/compilation
+  const allDiscography = MILES_DAVIS_DISCOGRAPHY.map((entry, i) => ({
+    id: studioIdMap.get(entry.title) ?? `mdx-${i}`,
+    title: entry.title,
+    year: entry.year,
+    batchId: "miles-davis",
+    artworkUrl: artworkMap.get(normalizeTitle(entry.title)) ?? "",
     label: entry.label,
     type: entry.type,
     description: descMap.get(`${entry.year}-${normalizeForDesc(entry.title)}`),
@@ -155,7 +171,7 @@ export default async function Home() {
       </header>
 
       <main className="max-w-3xl mx-auto">
-        <Feed batches={batches} />
+        <Feed batches={batches} allDiscography={allDiscography} />
       </main>
     </div>
   );
