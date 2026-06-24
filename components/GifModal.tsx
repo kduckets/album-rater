@@ -231,7 +231,7 @@ export function GifModal({ album, allAlbums, onClose }: GifModalProps) {
             href={spotifyUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="relative w-full aspect-square sm:aspect-auto sm:w-[42%] shrink-0 bg-black"
+            className="relative w-full aspect-square sm:w-[42%] shrink-0 bg-black sm:self-start"
             aria-label={`Listen to ${album.title} on Spotify`}
           >
             <Image

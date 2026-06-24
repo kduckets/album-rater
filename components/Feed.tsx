@@ -59,7 +59,6 @@ export function Feed({ batches, allDiscography }: FeedProps) {
   const [viewMode, setViewMode]         = useState<ViewMode>("classic");
   const [eraFilter, setEraFilter]       = useState<EraFilter>("all");
   const [sortOrder, setSortOrder]       = useState<SortOrder>("stars");
-  const [typeFilter, setTypeFilter]     = useState<TypeFilter>("all");
   const [labelFilter, setLabelFilter]   = useState<LabelFilter>("all");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
 
@@ -70,7 +69,7 @@ export function Feed({ batches, allDiscography }: FeedProps) {
   const fetchAverages = useAveragesStore((s) => s.fetchAverages);
 
   const batch      = batches[0];
-  const gridSource = allDiscography ?? batch.albums;
+  const gridSource = batch.albums; // studio albums only in both views
 
   useEffect(() => {
     fetchAverages(gridSource.map((a) => a.id));
@@ -96,8 +95,6 @@ export function Feed({ batches, allDiscography }: FeedProps) {
     let list = gridSource;
     if (eraFilter !== "all")
       list = list.filter((a) => a.year > 0 && getEra(a.year) === eraFilter);
-    if (typeFilter !== "all")
-      list = list.filter((a) => a.type === typeFilter);
     if (labelFilter !== "all")
       list = list.filter((a) => getLabelGroup(a.label) === labelFilter);
     if (statusFilter === "rated")
@@ -112,7 +109,7 @@ export function Feed({ batches, allDiscography }: FeedProps) {
         case "stars":    return a.year - b.year;
       }
     });
-  }, [gridSource, eraFilter, typeFilter, labelFilter, statusFilter, sortOrder, averages, comments, ratings]);
+  }, [gridSource, eraFilter, labelFilter, statusFilter, sortOrder, averages, comments, ratings]);
 
   const ratedCount = batch.albums.filter((a) => ratings[a.id]).length;
   const totalGifs  = Object.values(comments).reduce((n, arr) => n + arr.length, 0);
@@ -200,20 +197,6 @@ export function Feed({ batches, allDiscography }: FeedProps) {
           className="flex items-center gap-2 px-3 py-2.5 border-b border-zinc-900 overflow-x-auto overflow-y-hidden"
           style={{ touchAction: "pan-x" }}
         >
-          {(["all", "studio", "live", "compilation"] as TypeFilter[]).map((t) => (
-            <button
-              key={t}
-              onClick={() => setTypeFilter(t)}
-              className={`shrink-0 px-3 py-1 rounded-full text-[11px] font-semibold tracking-wide transition-colors cursor-pointer ${
-                typeFilter === t ? "bg-white text-black" : "bg-zinc-900 text-zinc-400 hover:text-white"
-              }`}
-            >
-              {t === "all" ? "All types" : t.charAt(0).toUpperCase() + t.slice(1)}
-            </button>
-          ))}
-
-          <span className="text-zinc-800 shrink-0">·</span>
-
           {(["all", "Columbia", "Prestige", "Blue Note", "Other"] as LabelFilter[]).map((l) => (
             <button
               key={l}
