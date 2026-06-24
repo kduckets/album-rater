@@ -32,30 +32,37 @@ export function AlbumGridCard({ album, allAlbums }: { album: Album; allAlbums: A
           onError={() => setArtErr(true)}
         />
 
-        {/* Community average badge */}
-        {average > 0 && (
-          <div className="absolute top-1 right-1 w-5 h-5 bg-black/80 rounded-full flex items-center justify-center text-white text-[9px] font-bold leading-none">
-            {Math.round(average)}
+        {/* Bottom info strip — always visible */}
+        <div className="absolute bottom-0 left-0 right-0 bg-black/75 flex items-center justify-between px-1.5 py-1 gap-1">
+          {/* Community average */}
+          <div className="flex items-center gap-0.5 min-w-0">
+            <span className="text-amber-400 text-[10px] leading-none">★</span>
+            <span className="text-white text-[10px] font-semibold leading-none">
+              {average > 0 ? average.toFixed(1) : "—"}
+            </span>
           </div>
-        )}
 
-        {/* Comment count */}
-        {commentCount > 0 && (
-          <div className="absolute top-1 left-1 w-5 h-5 bg-black/80 rounded-full flex items-center justify-center text-white text-[9px] font-bold leading-none">
-            {commentCount}
+          {/* User rating bar — 5 segments */}
+          <div className="flex gap-px flex-1 mx-1">
+            {[1, 2, 3, 4, 5].map((s) => (
+              <div
+                key={s}
+                className={`flex-1 h-1 rounded-sm transition-colors ${
+                  rating >= s ? "bg-amber-400/90" : "bg-white/15"
+                }`}
+              />
+            ))}
           </div>
-        )}
 
-        {/* Rating bar — 5 segments, always present, amber when rated */}
-        <div className="absolute bottom-0 left-0 right-0 flex gap-px p-px">
-          {[1, 2, 3, 4, 5].map((s) => (
-            <div
-              key={s}
-              className={`flex-1 h-0.75 rounded-sm transition-colors ${
-                rating >= s ? "bg-amber-400/90" : "bg-white/10"
-              }`}
-            />
-          ))}
+          {/* Comment count */}
+          <div className="flex items-center gap-0.5">
+            <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-zinc-400">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            </svg>
+            <span className="text-zinc-300 text-[10px] font-medium leading-none">
+              {commentCount > 0 ? commentCount : "0"}
+            </span>
+          </div>
         </div>
 
         {/* Hover overlay */}
