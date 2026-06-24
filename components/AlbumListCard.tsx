@@ -1,0 +1,162 @@
+"use client";
+
+import { useState } from "react";
+import Image from "next/image";
+import { InlineStarRating } from "./InlineStarRating";
+import { GifModal } from "./GifModal";
+import { useAlbumStore } from "@/store/albumStore";
+import type { Album } from "@/types";
+
+interface AlbumListCardProps {
+  album: Album;
+  rank: number;
+}
+
+export function AlbumListCard({ album, rank }: AlbumListCardProps) {
+  const [gifModalOpen, setGifModalOpen] = useState(false);
+  const commentCount = useAlbumStore(
+    (s) => (s.comments[album.id] ?? []).length
+  );
+  const rating = useAlbumStore((s) => s.ratings[album.id] ?? 0);
+  const setRating = useAlbumStore((s) => s.setRating);
+
+  const spotifyUrl = `https://open.spotify.com/search/${encodeURIComponent(
+    `${album.title} Miles Davis`
+  )}`;
+
+  return (
+    <>
+      <div className="flex border-b border-zinc-900 group">
+        {/* Album art — click goes to Spotify */}
+        <a
+          href={spotifyUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="relative w-[42%] sm:w-[38%] shrink-0 min-h-[200px] sm:min-h-[240px] overflow-hidden block"
+          aria-label={`Listen to ${album.title} on Spotify`}
+        >
+          {album.artworkUrl ? (
+            <Image
+              src={album.artworkUrl}
+              alt={album.title}
+              fill
+              className="object-cover transition-opacity duration-200 group-hover:opacity-90"
+              sizes="(max-width: 640px) 42vw, 38vw"
+            />
+          ) : (
+            <div className="absolute inset-0 bg-zinc-800 flex items-center justify-center p-4">
+              <span className="text-zinc-500 text-xs text-center leading-tight">
+                {album.title}
+              </span>
+            </div>
+          )}
+        </a>
+
+        {/* Content panel */}
+        <div className="flex-1 bg-white flex flex-col justify-between p-5 min-w-0">
+          <div>
+            <p className="text-[#3a7cc5] font-bold text-sm tracking-wide">
+              Miles Davis
+            </p>
+            <a
+              href={spotifyUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block text-[#3a7cc5] font-bold text-base sm:text-lg leading-snug mt-0.5 hover:underline"
+            >
+              {album.title}
+              {album.year ? ` (${album.year})` : ""}
+            </a>
+
+            {/* Label tags */}
+            <div className="flex flex-wrap gap-1.5 mt-2.5">
+              {album.label && (
+                <span className="px-2 py-0.5 bg-zinc-200 text-zinc-600 text-xs rounded">
+                  {album.label}
+                </span>
+              )}
+              <span className="px-2 py-0.5 bg-zinc-200 text-zinc-600 text-xs rounded">
+                Jazz
+              </span>
+              {album.year >= 1969 && album.year <= 1975 && (
+                <span className="px-2 py-0.5 bg-zinc-200 text-zinc-600 text-xs rounded">
+                  Fusion
+                </span>
+              )}
+            </div>
+
+            {/* Star rating */}
+            <div className="mt-3">
+              <InlineStarRating albumId={album.id} />
+            </div>
+          </div>
+
+          {/* Footer */}
+          <p className="text-zinc-400 text-xs mt-3">
+            Miles Davis Discography
+            {album.year ? ` · ${album.year}` : ""}
+          </p>
+        </div>
+
+        {/* Action strip */}
+        <div className="w-12 sm:w-14 shrink-0 flex flex-col items-center py-4 gap-4 bg-zinc-100 border-l border-zinc-200">
+          {/* Rank */}
+          <div className="w-7 h-7 sm:w-8 sm:h-8 bg-black rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0">
+            {rank}
+          </div>
+
+          {/* Rate up */}
+          <button
+            onClick={() => setRating(album.id, Math.min(5, rating + 1))}
+            className="text-zinc-400 hover:text-zinc-800 transition-colors cursor-pointer text-lg leading-none"
+            aria-label="Rate up"
+            title={`Rate up (current: ${rating}/5)`}
+          >
+            ↑
+          </button>
+
+          {/* Rate down */}
+          <button
+            onClick={() =>
+              setRating(album.id, Math.max(0, rating - 1))
+            }
+            className="text-zinc-400 hover:text-zinc-800 transition-colors cursor-pointer text-lg leading-none"
+            aria-label="Rate down"
+            title={`Rate down (current: ${rating}/5)`}
+          >
+            ↓
+          </button>
+
+          {/* GIF comments */}
+          <button
+            onClick={() => setGifModalOpen(true)}
+            className="flex flex-col items-center gap-0.5 text-zinc-400 hover:text-zinc-700 transition-colors cursor-pointer"
+            aria-label={`${commentCount} GIF reactions`}
+          >
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+            </svg>
+            {commentCount > 0 && (
+              <span className="text-[10px] text-zinc-500 font-medium">
+                {commentCount}
+              </span>
+            )}
+          </button>
+        </div>
+      </div>
+
+      {gifModalOpen && (
+        <GifModal album={album} onClose={() => setGifModalOpen(false)} />
+      )}
+    </>
+  );
+}
