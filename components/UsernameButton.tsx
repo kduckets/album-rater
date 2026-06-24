@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { getUsername, setUsername, hasSetUsername, getEffectiveUserId } from "@/lib/identity";
+import { getUsername, setUsername, hasSetUsername } from "@/lib/identity";
 import { useAlbumStore } from "@/store/albumStore";
 
 interface Props { albumIds: string[] }
@@ -13,6 +13,7 @@ export function UsernameButton({ albumIds }: Props) {
   const [syncing, setSyncing]   = useState(false);
   const inputRef                = useRef<HTMLInputElement>(null);
   const loadRatings             = useAlbumStore((s) => s.loadRatings);
+  const loadSaved               = useAlbumStore((s) => s.loadSaved);
 
   useEffect(() => { setMounted(true); }, []);
   useEffect(() => { if (open) { setInput(getUsername()); setTimeout(() => inputRef.current?.focus(), 50); } }, [open]);
@@ -25,13 +26,18 @@ export function UsernameButton({ albumIds }: Props) {
     if (name && albumIds.length) {
       setSyncing(true);
       try {
-        const res = await fetch("/api/my-ratings", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ userId: name, albumIds }),
-        });
-        const data = await res.json();
-        if (data.ratings) loadRatings(data.ratings);
+        const [ratingsRes, collectionRes] = await Promise.all([
+          fetch("/api/my-ratings", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ userId: name, albumIds }),
+          }),
+          fetch(`/api/collection?userId=${encodeURIComponent(name)}`),
+        ]);
+        const ratingsData = await ratingsRes.json();
+        if (ratingsData.ratings) loadRatings(ratingsData.ratings);
+        const collectionData = await collectionRes.json();
+        if (Array.isArray(collectionData.saved)) loadSaved(collectionData.saved);
       } catch { /* fail silently */ }
       setSyncing(false);
     }

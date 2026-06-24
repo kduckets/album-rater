@@ -24,10 +24,13 @@ function timeAgo(ts: number) {
   return `${d} day${d > 1 ? "s" : ""} ago`;
 }
 
-function SaveIcon()  { return <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>; }
 function ChevronUp() { return <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="18 15 12 9 6 15"/></svg>; }
 function ChevronDn() { return <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"/></svg>; }
-function FlagIcon()  { return <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>; }
+function BookmarkIcon({ filled }: { filled: boolean }) {
+  return filled
+    ? <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+    : <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>;
+}
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-/i;
 function displayName(userId: string) { return UUID_RE.test(userId) ? "Anonymous" : userId; }
@@ -69,8 +72,11 @@ export function GifModal({ album: initialAlbum, allAlbums, onClose }: GifModalPr
   const nameRef     = useRef<HTMLInputElement>(null);
   const ratersRef   = useRef<HTMLDivElement>(null);
 
-  const rating     = useAlbumStore((s) => s.ratings[album.id] ?? 0);
-  const setRating  = useAlbumStore((s) => s.setRating);
+  const rating       = useAlbumStore((s) => s.ratings[album.id] ?? 0);
+  const setRating    = useAlbumStore((s) => s.setRating);
+  const savedAlbums  = useAlbumStore((s) => s.savedAlbums);
+  const toggleSaved  = useAlbumStore((s) => s.toggleSaved);
+  const isSaved      = savedAlbums.includes(album.id);
   const average    = useAveragesStore((s) => s.averages[album.id] ?? 0);
   const raterCount = useAveragesStore((s) => s.raterCounts[album.id] ?? 0);
   const setCommentCount   = useAveragesStore((s) => s.setCommentCount);
@@ -138,6 +144,18 @@ export function GifModal({ album: initialAlbum, allAlbums, onClose }: GifModalPr
       .map(([userId, r]) => ({ userId, rating: r }))
       .sort((a, b) => b.rating - a.rating);
     setRaters(list);
+  }
+
+  async function handleSave() {
+    const userId = getEffectiveUserId();
+    if (!userId || !hasSetUsername()) return;
+    const next = !isSaved;
+    toggleSaved(album.id);
+    fetch("/api/collection", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId, albumId: album.id, save: next }),
+    }).catch(() => {});
   }
 
   const related = allAlbums
@@ -310,58 +328,9 @@ export function GifModal({ album: initialAlbum, allAlbums, onClose }: GifModalPr
                 </p>
               </div>
 
-              {/* Stars + community average */}
-              <div className="flex items-center justify-between gap-3">
-                {/* User's rating stars */}
-                <div className="flex items-center gap-0.5">
-                  {[1,2,3,4,5].map((s) => (
-                    <span key={s} className={`text-lg leading-none ${rating >= s ? "text-amber-400" : "text-zinc-700"}`}>★</span>
-                  ))}
-                </div>
-
-                {/* Community average — hover to see who rated */}
-                <div
-                  className="relative"
-                  ref={ratersRef}
-                  onMouseEnter={openRaters}
-                  onMouseLeave={() => setShowRaters(false)}
-                >
-                  <button
-                    onClick={openRaters}
-                    className="flex items-center gap-1.5 cursor-pointer group"
-                    title="See who rated this album"
-                  >
-                    <span className="text-amber-400 text-sm">★</span>
-                    <span className="text-white text-sm font-semibold">{average > 0 ? average.toFixed(1) : "—"}</span>
-                    {raterCount > 0 && (
-                      <span className="text-zinc-500 text-xs group-hover:text-zinc-400 transition-colors">
-                        {raterCount} rating{raterCount !== 1 ? "s" : ""}
-                      </span>
-                    )}
-                  </button>
-
-                  {showRaters && (
-                    <div className="absolute right-0 top-full mt-1 z-50 w-48 bg-zinc-950 border border-zinc-800 rounded-lg shadow-2xl py-2">
-                      {raters === null ? (
-                        <p className="px-3 py-1 text-zinc-600 text-xs">Loading…</p>
-                      ) : raters.length === 0 ? (
-                        <p className="px-3 py-1 text-zinc-500 text-xs">No ratings yet</p>
-                      ) : (
-                        raters.map(({ userId, rating: r }) => (
-                          <div key={userId} className="flex items-center justify-between px-3 py-1.5">
-                            <span className="text-zinc-300 text-xs truncate max-w-24">{displayName(userId)}</span>
-                            <span className="text-amber-400 text-xs tracking-tight shrink-0">{"★".repeat(r)}{"☆".repeat(5 - r)}</span>
-                          </div>
-                        ))
-                      )}
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Action bar */}
+              {/* Rating + action bar */}
               <div className="flex items-center gap-3">
-                <button className="text-zinc-500 hover:text-white transition-colors cursor-pointer" aria-label="Save"><SaveIcon /></button>
+                {/* User rating */}
                 <button
                   onClick={() => hasSetUsername() && setRating(album.id, Math.min(5, rating + 1))}
                   className={`transition-colors cursor-pointer ${hasSetUsername() ? "text-zinc-500 hover:text-white" : "text-zinc-800 cursor-not-allowed"}`}
@@ -377,7 +346,56 @@ export function GifModal({ album: initialAlbum, allAlbums, onClose }: GifModalPr
                   aria-label="Rate down"
                   title={!hasSetUsername() ? "Set a username to rate" : undefined}
                 ><ChevronDn /></button>
-                <button className="text-zinc-500 hover:text-white transition-colors cursor-pointer" aria-label="Flag"><FlagIcon /></button>
+
+                {/* Community average — hover to see who rated */}
+                <div
+                  className="relative ml-1"
+                  ref={ratersRef}
+                  onMouseEnter={openRaters}
+                  onMouseLeave={() => setShowRaters(false)}
+                >
+                  <button
+                    onClick={openRaters}
+                    className="w-8 h-8 bg-amber-400 rounded-full flex items-center justify-center text-black text-sm font-bold shrink-0 cursor-pointer hover:bg-amber-300 transition-colors"
+                    title={raterCount > 0 ? `Community avg · ${raterCount} rating${raterCount !== 1 ? "s" : ""}` : "No ratings yet"}
+                  >
+                    {average > 0 ? average.toFixed(1) : "—"}
+                  </button>
+                  {raterCount > 0 && (
+                    <span className="absolute -bottom-4 left-1/2 -translate-x-1/2 text-[9px] text-zinc-600 whitespace-nowrap">
+                      {raterCount} rating{raterCount !== 1 ? "s" : ""}
+                    </span>
+                  )}
+
+                  {showRaters && (
+                    <div className="absolute left-0 top-full mt-6 z-50 w-48 bg-zinc-950 border border-zinc-800 rounded-lg shadow-2xl py-2">
+                      {raters === null ? (
+                        <p className="px-3 py-1 text-zinc-600 text-xs">Loading…</p>
+                      ) : raters.length === 0 ? (
+                        <p className="px-3 py-1 text-zinc-500 text-xs">No ratings yet</p>
+                      ) : (
+                        raters.map(({ userId, rating: r }) => (
+                          <div key={userId} className="flex items-center justify-between px-3 py-1.5">
+                            <span className="text-zinc-300 text-xs truncate max-w-24">{displayName(userId)}</span>
+                            <span className="text-amber-400 text-xs tracking-tight shrink-0">{"★".repeat(r)}{"☆".repeat(5 - r)}</span>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {/* Bookmark / save to collection */}
+                <button
+                  onClick={handleSave}
+                  className={`transition-colors cursor-pointer ml-1 ${
+                    isSaved ? "text-white" : "text-zinc-600 hover:text-zinc-300"
+                  } ${!hasSetUsername() ? "opacity-30 cursor-not-allowed" : ""}`}
+                  aria-label={isSaved ? "Remove from collection" : "Save to collection"}
+                  title={!hasSetUsername() ? "Set a username to save" : isSaved ? "Remove from collection" : "Save to collection"}
+                >
+                  <BookmarkIcon filled={isSaved} />
+                </button>
 
                 {/* Streaming links */}
                 <div className="ml-auto flex items-center gap-2">

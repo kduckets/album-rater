@@ -7,11 +7,14 @@ import type { GifComment } from '@/types'
 interface AlbumStore {
   ratings: Record<string, number>
   comments: Record<string, GifComment[]>
+  savedAlbums: string[]
   setRating: (albumId: string, rating: number) => void
   loadRatings: (incoming: Record<string, number>) => void
   setComments: (albumId: string, comments: GifComment[]) => void
   addComment: (albumId: string, comment: GifComment) => void
   removeComment: (albumId: string, commentId: string) => void
+  toggleSaved: (albumId: string) => void
+  loadSaved: (albumIds: string[]) => void
 }
 
 export const useAlbumStore = create<AlbumStore>()(
@@ -19,6 +22,7 @@ export const useAlbumStore = create<AlbumStore>()(
     (set) => ({
       ratings: {},
       comments: {},
+      savedAlbums: [],
       setRating: (albumId, rating) =>
         set((state) => {
           const newRatings = { ...state.ratings }
@@ -46,6 +50,14 @@ export const useAlbumStore = create<AlbumStore>()(
             [albumId]: (state.comments[albumId] ?? []).filter((c) => c.id !== commentId),
           },
         })),
+      toggleSaved: (albumId) =>
+        set((state) => ({
+          savedAlbums: state.savedAlbums.includes(albumId)
+            ? state.savedAlbums.filter((id) => id !== albumId)
+            : [...state.savedAlbums, albumId],
+        })),
+      loadSaved: (albumIds) =>
+        set(() => ({ savedAlbums: albumIds })),
     }),
     { name: 'album-rater-store' }
   )
