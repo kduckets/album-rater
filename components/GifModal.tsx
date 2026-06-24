@@ -435,11 +435,11 @@ export function GifModal({ album: initialAlbum, allAlbums, onClose }: GifModalPr
                 <div className="space-y-4">
                   {comments.map((c) => (
                     <div key={c.id} className="flex items-start gap-3 group">
-                      <div className="w-20 h-20 rounded overflow-hidden bg-zinc-900 shrink-0">
+                      <div className="w-28 h-28 rounded overflow-hidden bg-zinc-900 shrink-0">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img src={c.gifUrl} alt="GIF" className="w-full h-full object-cover" />
                       </div>
-                      <div className="flex flex-col justify-between h-20 min-w-0">
+                      <div className="flex flex-col justify-between h-28 min-w-0">
                         <span className="text-xl select-none">👍</span>
                         <div>
                           <p className="text-zinc-500 text-xs">
