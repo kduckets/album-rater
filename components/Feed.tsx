@@ -60,6 +60,7 @@ export function Feed({ batches, allDiscography }: FeedProps) {
   const [sortOrder, setSortOrder]       = useState<SortOrder>("new");
   const [labelFilter, setLabelFilter]   = useState<LabelFilter>("all");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
+  const [sortDir, setSortDir]           = useState<"desc" | "asc">("desc");
   const [searchOpen, setSearchOpen]     = useState(false);
   const [searchQuery, setSearchQuery]   = useState("");
   const searchRef                       = useRef<HTMLInputElement>(null);
@@ -84,6 +85,7 @@ export function Feed({ batches, allDiscography }: FeedProps) {
       setViewMode("classic");
       setEraFilter("all");
       setSortOrder("new");
+      setSortDir("desc");
       setLabelFilter("all");
       setStatusFilter("all");
       setSearchOpen(false);
@@ -106,14 +108,15 @@ export function Feed({ batches, allDiscography }: FeedProps) {
       if (statusFilter === "saved" && !savedAlbums.includes(a.id)) return false;
       return true;
     });
+    const dir = sortDir === "desc" ? 1 : -1;
     return [...filtered].sort((a, b) => {
       switch (sortOrder) {
-        case "new":      return b.year - a.year;
-        case "top":      return (averages[b.id] ?? 0) - (averages[a.id] ?? 0);
-        case "comments": return (lastCommentAt[b.id] ?? 0) - (lastCommentAt[a.id] ?? 0);
+        case "new":      return dir * (b.year - a.year);
+        case "top":      return dir * ((averages[b.id] ?? 0) - (averages[a.id] ?? 0));
+        case "comments": return dir * ((lastCommentAt[b.id] ?? 0) - (lastCommentAt[a.id] ?? 0));
       }
     });
-  }, [batch.albums, eraFilter, sortOrder, averages, lastCommentAt, searchLower, statusFilter, ratings, savedAlbums]);
+  }, [batch.albums, eraFilter, sortOrder, sortDir, averages, lastCommentAt, searchLower, statusFilter, ratings, savedAlbums]);
 
   // Grid view: reviewed albums only, with extra filters
   const gridAlbums = useMemo(() => {
@@ -132,14 +135,15 @@ export function Feed({ batches, allDiscography }: FeedProps) {
       list = list.filter((a) => !(ratings[a.id] ?? 0));
     if (statusFilter === "saved")
       list = list.filter((a) => savedAlbums.includes(a.id));
+    const dir = sortDir === "desc" ? 1 : -1;
     return [...list].sort((a, b) => {
       switch (sortOrder) {
-        case "new":      return b.year - a.year;
-        case "top":      return (averages[b.id] ?? 0) - (averages[a.id] ?? 0);
-        case "comments": return (lastCommentAt[b.id] ?? 0) - (lastCommentAt[a.id] ?? 0);
+        case "new":      return dir * (b.year - a.year);
+        case "top":      return dir * ((averages[b.id] ?? 0) - (averages[a.id] ?? 0));
+        case "comments": return dir * ((lastCommentAt[b.id] ?? 0) - (lastCommentAt[a.id] ?? 0));
       }
     });
-  }, [gridSource, eraFilter, labelFilter, statusFilter, sortOrder, averages, lastCommentAt, ratings, savedAlbums, searchLower]);
+  }, [gridSource, eraFilter, labelFilter, statusFilter, sortOrder, sortDir, averages, lastCommentAt, ratings, savedAlbums, searchLower]);
 
   const ratedCount = batch.albums.filter((a) => ratings[a.id]).length;
   const totalGifs  = Object.values(comments).reduce((n, arr) => n + arr.length, 0);
@@ -194,12 +198,20 @@ export function Feed({ batches, allDiscography }: FeedProps) {
         {SORT_TABS.map(({ label, value }) => (
           <button
             key={value}
-            onClick={() => setSortOrder(value)}
-            className={`px-5 py-2.5 text-xs tracking-widest font-medium transition-colors cursor-pointer ${
+            onClick={() => {
+              if (sortOrder === value) setSortDir((d) => d === "desc" ? "asc" : "desc");
+              else { setSortOrder(value); setSortDir("desc"); }
+            }}
+            className={`px-5 py-2.5 text-xs tracking-widest font-medium transition-colors cursor-pointer flex items-center gap-1 ${
               sortOrder === value ? "text-white" : "text-zinc-600 hover:text-zinc-400"
             }`}
           >
             {label}
+            {sortOrder === value && (
+              <span className="text-[10px] leading-none opacity-60">
+                {sortDir === "desc" ? "↓" : "↑"}
+              </span>
+            )}
           </button>
         ))}
         <div className="ml-auto pr-3 flex items-center gap-0.5">
