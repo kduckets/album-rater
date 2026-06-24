@@ -74,7 +74,7 @@ export function AlbumListCard({ album, allAlbums }: AlbumListCardProps) {
 
   return (
     <>
-      <div className="flex flex-col sm:flex-row group">
+      <div className="flex flex-col sm:flex-row group overflow-hidden rounded sm:rounded-none">
         {/* Album art */}
         <a
           href={spotifyUrl}
