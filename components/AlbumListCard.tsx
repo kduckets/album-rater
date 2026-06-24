@@ -6,7 +6,7 @@ import { InlineStarRating } from "./InlineStarRating";
 import { GifModal } from "./GifModal";
 import { useAlbumStore } from "@/store/albumStore";
 import { useAveragesStore } from "@/store/averagesStore";
-import { getVisitorId } from "@/lib/visitorId";
+import { getEffectiveUserId } from "@/lib/identity";
 import type { Album } from "@/types";
 
 interface AlbumListCardProps {
@@ -53,7 +53,7 @@ export function AlbumListCard({ album, allAlbums }: AlbumListCardProps) {
     if (prevRating.current === rating) return;
     prevRating.current = rating;
 
-    const userId = getVisitorId();
+    const userId = getEffectiveUserId();
     if (!userId) return;
     fetch("/api/rate", {
       method: "POST",

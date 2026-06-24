@@ -8,6 +8,7 @@ interface AlbumStore {
   ratings: Record<string, number>
   comments: Record<string, GifComment[]>
   setRating: (albumId: string, rating: number) => void
+  loadRatings: (incoming: Record<string, number>) => void
   setComments: (albumId: string, comments: GifComment[]) => void
   addComment: (albumId: string, comment: GifComment) => void
   removeComment: (albumId: string, commentId: string) => void
@@ -25,6 +26,8 @@ export const useAlbumStore = create<AlbumStore>()(
           else newRatings[albumId] = rating
           return { ratings: newRatings }
         }),
+      loadRatings: (incoming) =>
+        set((state) => ({ ratings: { ...state.ratings, ...incoming } })),
       setComments: (albumId, comments) =>
         set((state) => ({
           comments: { ...state.comments, [albumId]: comments },

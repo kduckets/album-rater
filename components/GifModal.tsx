@@ -4,8 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { useAlbumStore } from "@/store/albumStore";
 import { useAveragesStore } from "@/store/averagesStore";
-import { getVisitorId } from "@/lib/visitorId";
-import { getDisplayName, setDisplayName, hasSetDisplayName } from "@/lib/displayName";
+import { getUsername, setUsername, hasSetUsername, getEffectiveUserId } from "@/lib/identity";
 import type { Album, GifComment } from "@/types";
 
 interface GifModalProps {
@@ -59,7 +58,7 @@ export function GifModal({ album, allAlbums, onClose }: GifModalProps) {
   const setCommentCount   = useAveragesStore((s) => s.setCommentCount);
   const setLastCommentAt  = useAveragesStore((s) => s.setLastCommentAt);
 
-  const visitorId     = getVisitorId();
+  const visitorId     = getEffectiveUserId();
   const spotifyUrl    = `https://open.spotify.com/search/${encodeURIComponent(`${album.title} Miles Davis`)}`;
   const appleMusicUrl = `https://music.apple.com/search?term=${encodeURIComponent(`${album.title} Miles Davis`)}`;
 
@@ -90,7 +89,7 @@ export function GifModal({ album, allAlbums, onClose }: GifModalProps) {
     .slice(0, 4);
 
   function startAddMode(mode: "search" | "paste") {
-    if (!hasSetDisplayName()) {
+    if (!hasSetUsername()) {
       setPendingMode(mode);
       setAddMode("name-prompt");
     } else {
@@ -99,7 +98,7 @@ export function GifModal({ album, allAlbums, onClose }: GifModalProps) {
   }
 
   function confirmName() {
-    setDisplayName(nameInput); // "" = anonymous, also valid
+    setUsername(nameInput); // "" = anonymous, also valid
     const next = pendingMode ?? "search";
     setPendingMode(null);
     setAddMode(next);
@@ -114,7 +113,7 @@ export function GifModal({ album, allAlbums, onClose }: GifModalProps) {
         body: JSON.stringify({
           albumId: album.id,
           gifUrl: url,
-          author: getDisplayName(),
+          author: getUsername(),
           visitorId,
         }),
       });
@@ -183,7 +182,7 @@ export function GifModal({ album, allAlbums, onClose }: GifModalProps) {
     setGifUrl(""); setPreview(""); setPasteErr(false);
   }
 
-  const myName = hasSetDisplayName() ? getDisplayName() : null;
+  const myName = hasSetUsername() ? getUsername() : null;
 
   return (
     <div
