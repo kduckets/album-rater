@@ -36,7 +36,8 @@ type AddMode = "default" | "name-prompt" | "search" | "paste";
 
 interface GifResult { id: string; title: string; url: string; preview: string }
 
-export function GifModal({ album, allAlbums, onClose }: GifModalProps) {
+export function GifModal({ album: initialAlbum, allAlbums, onClose }: GifModalProps) {
+  const [album, setAlbum]             = useState(initialAlbum);
   const [addMode, setAddMode]         = useState<AddMode>("default");
   const [pendingMode, setPendingMode] = useState<"search" | "paste" | null>(null);
   const [nameInput, setNameInput]     = useState("");
@@ -52,6 +53,15 @@ export function GifModal({ album, allAlbums, onClose }: GifModalProps) {
   const [posting, setPosting]         = useState(false);
   const [showRaters, setShowRaters]   = useState(false);
   const [raters, setRaters]           = useState<{ userId: string; rating: number }[] | null>(null);
+
+  function navigateTo(next: typeof initialAlbum) {
+    setAlbum(next);
+    setAddMode("default");
+    setQuery(""); setResults([]); setGifUrl(""); setPreview("");
+    setPasteErr(false); setArtErr(false);
+    setComments([]); setLoadingComments(true); setPosting(false);
+    setShowRaters(false); setRaters(null);
+  }
 
   const backdropRef = useRef<HTMLDivElement>(null);
   const searchRef   = useRef<HTMLInputElement>(null);
@@ -73,6 +83,7 @@ export function GifModal({ album, allAlbums, onClose }: GifModalProps) {
 
   // Persist rating changes to Redis
   const prevRating = useRef<number | null>(null);
+  useEffect(() => { prevRating.current = null; }, [album.id]);
   useEffect(() => {
     if (prevRating.current === null) { prevRating.current = rating; return; }
     if (prevRating.current === rating) return;
@@ -579,16 +590,14 @@ export function GifModal({ album, allAlbums, onClose }: GifModalProps) {
                     <p className="text-zinc-400 text-sm font-medium mb-3">Related Albums:</p>
                     <div className="flex gap-2">
                       {related.map((rel) => (
-                        <a
+                        <button
                           key={rel.id}
-                          href={`https://open.spotify.com/search/${encodeURIComponent(`${rel.title} Miles Davis`)}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="relative w-16 h-16 rounded overflow-hidden bg-zinc-900 shrink-0 hover:opacity-75 transition-opacity"
+                          onClick={() => navigateTo(rel)}
+                          className="relative w-16 h-16 rounded overflow-hidden bg-zinc-900 shrink-0 hover:opacity-75 transition-opacity cursor-pointer"
                           title={rel.title}
                         >
                           <Image src={rel.artworkUrl || FALLBACK_IMG} alt={rel.title} fill className="object-cover" sizes="64px" />
-                        </a>
+                        </button>
                       ))}
                     </div>
                   </div>
