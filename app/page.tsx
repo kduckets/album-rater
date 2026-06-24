@@ -142,7 +142,7 @@ export default async function Home() {
   const batches: Batch[] = [
     {
       id: "miles-davis",
-      name: "Miles Davis Discography",
+      name: "Miles Takes Years",
       description:
         "The complete discography of Miles Davis — studio albums, live recordings, and compilations.",
       albums,
