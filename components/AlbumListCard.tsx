@@ -9,12 +9,11 @@ import type { Album } from "@/types";
 
 interface AlbumListCardProps {
   album: Album;
-  rank: number;
 }
 
 const FALLBACK_IMG = "/miles-davis.png";
 
-export function AlbumListCard({ album, rank }: AlbumListCardProps) {
+export function AlbumListCard({ album }: AlbumListCardProps) {
   const [gifModalOpen, setGifModalOpen] = useState(false);
   const [artworkError, setArtworkError] = useState(false);
   const commentCount = useAlbumStore(
@@ -112,10 +111,22 @@ export function AlbumListCard({ album, rank }: AlbumListCardProps) {
         </div>
 
         {/* Action strip */}
-        <div className="w-12 sm:w-14 shrink-0 flex flex-col items-center py-4 gap-5 bg-zinc-100 border-l border-zinc-200">
-          {/* Rank */}
-          <div className="w-7 h-7 sm:w-8 sm:h-8 bg-black rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0">
-            {rank}
+        <div className="w-12 sm:w-14 shrink-0 flex flex-col items-center py-4 gap-4 bg-zinc-100 border-l border-zinc-200">
+          {/* Average rating */}
+          <div className="flex flex-col items-center gap-1.5">
+            <div className="w-8 h-8 bg-black rounded-full flex items-center justify-center text-white text-sm font-bold shrink-0">
+              {rating > 0 ? rating : "—"}
+            </div>
+            <div className="flex">
+              {[1, 2, 3, 4, 5].map((s) => (
+                <span
+                  key={s}
+                  className={`text-[9px] leading-none ${rating >= s ? "text-amber-400" : "text-zinc-300"}`}
+                >
+                  ★
+                </span>
+              ))}
+            </div>
           </div>
 
           {/* GIF comments */}

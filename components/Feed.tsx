@@ -118,7 +118,7 @@ export function Feed({ batches }: FeedProps) {
           </div>
         ) : (
           filteredAndSorted.map((album, index) => (
-            <AlbumListCard key={album.id} album={album} rank={index + 1} />
+            <AlbumListCard key={album.id} album={album} />
           ))
         )}
       </div>
