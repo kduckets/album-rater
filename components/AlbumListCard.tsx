@@ -95,6 +95,13 @@ export function AlbumListCard({ album, allAlbums }: AlbumListCardProps) {
               )}
             </div>
 
+            {/* Description */}
+            {album.description && (
+              <p className="mt-3 text-zinc-500 text-xs leading-relaxed line-clamp-3 italic">
+                {album.description}
+              </p>
+            )}
+
             {/* Star rating */}
             <div className="mt-4">
               <p className="text-[10px] uppercase tracking-widest text-zinc-400 mb-1.5 font-semibold">

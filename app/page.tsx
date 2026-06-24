@@ -13,6 +13,33 @@ function normalizeTitle(t: string) {
     .trim();
 }
 
+// More aggressive normalization for matching descriptions by title + year
+function normalizeForDesc(t: string) {
+  return t
+    .toLowerCase()
+    .replace(/\bvol(ume)?\.?\b/g, "")
+    .replace(/[^a-z0-9 ]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+async function fetchDescriptions(): Promise<Map<string, string>> {
+  const map = new Map<string, string>();
+  try {
+    const res = await fetch("https://cmurray1221.github.io/posts.json", {
+      next: { revalidate: 3600 },
+    });
+    if (!res.ok) return map;
+    const posts: Array<{ title: string; year: number; notes: string }> = await res.json();
+    for (const post of posts) {
+      const key = `${post.year}-${normalizeForDesc(post.title)}`;
+      const notes = post.notes.replace(/^-\s*/, "").trim();
+      map.set(key, notes);
+    }
+  } catch { /* fall through */ }
+  return map;
+}
+
 async function fetchItunesArtwork(): Promise<Map<string, string>> {
   const map = new Map<string, string>();
   try {
@@ -55,7 +82,10 @@ async function fetchLastFmImage(title: string): Promise<string> {
 }
 
 export default async function Home() {
-  const artworkMap = await fetchItunesArtwork();
+  const [artworkMap, descMap] = await Promise.all([
+    fetchItunesArtwork(),
+    fetchDescriptions(),
+  ]);
 
   const studioAlbums = MILES_DAVIS_DISCOGRAPHY.filter((e) => e.type === "studio");
 
@@ -74,6 +104,7 @@ export default async function Home() {
     artworkUrl: artworkMap.get(normalizeTitle(entry.title)) ?? lastFmMap.get(entry.title) ?? "",
     label: entry.label,
     type: entry.type,
+    description: descMap.get(`${entry.year}-${normalizeForDesc(entry.title)}`),
   }));
 
   const batches: Batch[] = [

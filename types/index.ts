@@ -8,6 +8,7 @@ export interface Album {
   artworkUrl: string
   label?: string
   type: AlbumType
+  description?: string
 }
 
 export interface Batch {

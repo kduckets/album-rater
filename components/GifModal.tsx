@@ -183,6 +183,13 @@ export function GifModal({ album, allAlbums, onClose }: GifModalProps) {
 
             <hr className="border-zinc-800" />
 
+            {/* Description */}
+            {album.description && (
+              <p className="text-zinc-400 text-sm leading-relaxed italic">
+                {album.description}
+              </p>
+            )}
+
             {/* Existing GIF comments */}
             {comments.length > 0 && (
               <div className="space-y-4">
