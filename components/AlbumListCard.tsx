@@ -12,8 +12,11 @@ interface AlbumListCardProps {
   rank: number;
 }
 
+const FALLBACK_IMG = "/miles-davis.png";
+
 export function AlbumListCard({ album, rank }: AlbumListCardProps) {
   const [gifModalOpen, setGifModalOpen] = useState(false);
+  const [artworkError, setArtworkError] = useState(false);
   const commentCount = useAlbumStore(
     (s) => (s.comments[album.id] ?? []).length
   );
@@ -35,20 +38,23 @@ export function AlbumListCard({ album, rank }: AlbumListCardProps) {
           className="relative w-[42%] sm:w-[38%] shrink-0 min-h-[200px] sm:min-h-[240px] overflow-hidden block"
           aria-label={`Listen to ${album.title} on Spotify`}
         >
-          {album.artworkUrl ? (
+          {album.artworkUrl && !artworkError ? (
             <Image
               src={album.artworkUrl}
               alt={album.title}
               fill
               className="object-cover transition-opacity duration-200 group-hover:opacity-90"
               sizes="(max-width: 640px) 42vw, 38vw"
+              onError={() => setArtworkError(true)}
             />
           ) : (
-            <div className="absolute inset-0 bg-zinc-800 flex items-center justify-center p-4">
-              <span className="text-zinc-500 text-xs text-center leading-tight">
-                {album.title}
-              </span>
-            </div>
+            <Image
+              src={FALLBACK_IMG}
+              alt="Miles Davis"
+              fill
+              className="object-cover object-top transition-opacity duration-200 group-hover:opacity-90"
+              sizes="(max-width: 640px) 42vw, 38vw"
+            />
           )}
         </a>
 
