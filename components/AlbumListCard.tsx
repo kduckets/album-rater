@@ -176,7 +176,7 @@ export function AlbumListCard({ album, allAlbums }: AlbumListCardProps) {
             </div>
 
             <p className="text-zinc-400 text-xs mt-3">
-              Miles Davis Discography{album.year ? ` · ${album.year}` : ""}
+              Miles Takes Years{album.year ? ` · ${album.year}` : ""}
             </p>
           </div>
 
