@@ -29,6 +29,9 @@ function ChevronUp() { return <svg width="17" height="17" viewBox="0 0 24 24" fi
 function ChevronDn() { return <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"/></svg>; }
 function FlagIcon()  { return <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>; }
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-/i;
+function displayName(userId: string) { return UUID_RE.test(userId) ? "Anonymous" : userId; }
+
 type AddMode = "default" | "name-prompt" | "search" | "paste";
 
 interface GifResult { id: string; title: string; url: string; preview: string }
@@ -47,14 +50,19 @@ export function GifModal({ album, allAlbums, onClose }: GifModalProps) {
   const [comments, setComments]       = useState<GifComment[]>([]);
   const [loadingComments, setLoadingComments] = useState(true);
   const [posting, setPosting]         = useState(false);
+  const [showRaters, setShowRaters]   = useState(false);
+  const [raters, setRaters]           = useState<{ userId: string; rating: number }[] | null>(null);
 
   const backdropRef = useRef<HTMLDivElement>(null);
   const searchRef   = useRef<HTMLInputElement>(null);
   const pasteRef    = useRef<HTMLInputElement>(null);
   const nameRef     = useRef<HTMLInputElement>(null);
+  const ratersRef   = useRef<HTMLDivElement>(null);
 
   const rating     = useAlbumStore((s) => s.ratings[album.id] ?? 0);
   const setRating  = useAlbumStore((s) => s.setRating);
+  const average    = useAveragesStore((s) => s.averages[album.id] ?? 0);
+  const raterCount = useAveragesStore((s) => s.raterCounts[album.id] ?? 0);
   const setCommentCount   = useAveragesStore((s) => s.setCommentCount);
   const setLastCommentAt  = useAveragesStore((s) => s.setLastCommentAt);
   const setAverage        = useAveragesStore((s) => s.setAverage);
@@ -100,6 +108,26 @@ export function GifModal({ album, allAlbums, onClose }: GifModalProps) {
   useEffect(() => { if (addMode === "search") searchRef.current?.focus(); }, [addMode]);
   useEffect(() => { if (addMode === "paste")  pasteRef.current?.focus();  }, [addMode]);
   useEffect(() => { if (addMode === "name-prompt") nameRef.current?.focus(); }, [addMode]);
+
+  useEffect(() => {
+    if (!showRaters) return;
+    function handler(e: MouseEvent) {
+      if (ratersRef.current && !ratersRef.current.contains(e.target as Node)) setShowRaters(false);
+    }
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [showRaters]);
+
+  async function openRaters() {
+    setShowRaters((v) => !v);
+    if (raters !== null) return;
+    const res = await fetch(`/api/album-ratings?albumId=${encodeURIComponent(album.id)}`);
+    const data = await res.json();
+    const list = Object.entries(data.ratings as Record<string, number>)
+      .map(([userId, r]) => ({ userId, rating: r }))
+      .sort((a, b) => b.rating - a.rating);
+    setRaters(list);
+  }
 
   const related = allAlbums
     .filter((a) => a.id !== album.id && a.artworkUrl)
@@ -271,11 +299,48 @@ export function GifModal({ album, allAlbums, onClose }: GifModalProps) {
                 </p>
               </div>
 
-              {/* Stars */}
-              <div className="flex items-center gap-0.5">
-                {[1,2,3,4,5].map((s) => (
-                  <span key={s} className={`text-lg leading-none ${rating >= s ? "text-amber-400" : "text-zinc-700"}`}>★</span>
-                ))}
+              {/* Stars + community average */}
+              <div className="flex items-center justify-between gap-3">
+                {/* User's rating stars */}
+                <div className="flex items-center gap-0.5">
+                  {[1,2,3,4,5].map((s) => (
+                    <span key={s} className={`text-lg leading-none ${rating >= s ? "text-amber-400" : "text-zinc-700"}`}>★</span>
+                  ))}
+                </div>
+
+                {/* Community average — clickable to see who rated */}
+                <div className="relative" ref={ratersRef}>
+                  <button
+                    onClick={openRaters}
+                    className="flex items-center gap-1.5 cursor-pointer group"
+                    title="See who rated this album"
+                  >
+                    <span className="text-amber-400 text-sm">★</span>
+                    <span className="text-white text-sm font-semibold">{average > 0 ? average.toFixed(1) : "—"}</span>
+                    {raterCount > 0 && (
+                      <span className="text-zinc-500 text-xs group-hover:text-zinc-400 transition-colors">
+                        {raterCount} rating{raterCount !== 1 ? "s" : ""}
+                      </span>
+                    )}
+                  </button>
+
+                  {showRaters && (
+                    <div className="absolute right-0 top-full mt-1 z-50 w-48 bg-zinc-950 border border-zinc-800 rounded-lg shadow-2xl py-2">
+                      {raters === null ? (
+                        <p className="px-3 py-1 text-zinc-600 text-xs">Loading…</p>
+                      ) : raters.length === 0 ? (
+                        <p className="px-3 py-1 text-zinc-500 text-xs">No ratings yet</p>
+                      ) : (
+                        raters.map(({ userId, rating: r }) => (
+                          <div key={userId} className="flex items-center justify-between px-3 py-1.5">
+                            <span className="text-zinc-300 text-xs truncate max-w-24">{displayName(userId)}</span>
+                            <span className="text-amber-400 text-xs tracking-tight shrink-0">{"★".repeat(r)}{"☆".repeat(5 - r)}</span>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  )}
+                </div>
               </div>
 
               {/* Action bar */}
