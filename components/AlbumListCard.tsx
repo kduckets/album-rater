@@ -28,13 +28,13 @@ export function AlbumListCard({ album, allAlbums }: AlbumListCardProps) {
 
   return (
     <>
-      <div className="flex border-b border-zinc-900 group">
-        {/* Album art — click goes to Spotify */}
+      <div className="flex flex-col sm:flex-row border-b border-zinc-900 group">
+        {/* Album art — full width square on mobile, fixed column on sm+ */}
         <a
           href={spotifyUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="relative w-[42%] sm:w-[38%] shrink-0 min-h-50 sm:min-h-60 overflow-hidden block"
+          className="relative w-full aspect-square sm:aspect-auto sm:w-[38%] sm:min-h-60 shrink-0 overflow-hidden block"
           aria-label={`Listen to ${album.title} on Spotify`}
         >
           {album.artworkUrl && !artworkError ? (
@@ -43,7 +43,7 @@ export function AlbumListCard({ album, allAlbums }: AlbumListCardProps) {
               alt={album.title}
               fill
               className="object-cover transition-opacity duration-200 group-hover:opacity-90"
-              sizes="(max-width: 640px) 42vw, 38vw"
+              sizes="(max-width: 640px) 100vw, 38vw"
               onError={() => setArtworkError(true)}
             />
           ) : (
@@ -52,10 +52,13 @@ export function AlbumListCard({ album, allAlbums }: AlbumListCardProps) {
               alt="Miles Davis"
               fill
               className="object-cover object-top transition-opacity duration-200 group-hover:opacity-90"
-              sizes="(max-width: 640px) 42vw, 38vw"
+              sizes="(max-width: 640px) 100vw, 38vw"
             />
           )}
         </a>
+
+        {/* Content + action strip row (always horizontal) */}
+        <div className="flex flex-1 min-w-0">
 
         {/* Content panel */}
         <div className="flex-1 bg-white flex flex-col justify-between p-5 min-w-0">
@@ -162,6 +165,8 @@ export function AlbumListCard({ album, allAlbums }: AlbumListCardProps) {
             )}
           </button>
         </div>
+
+        </div>{/* end content+strip row */}
       </div>
 
       {gifModalOpen && (
