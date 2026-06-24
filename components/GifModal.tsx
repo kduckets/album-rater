@@ -113,7 +113,7 @@ export function GifModal({ album, allAlbums, onClose }: GifModalProps) {
   return (
     <div
       ref={backdropRef}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm overflow-x-hidden"
       onClick={(e) => { if (e.target === backdropRef.current) onClose(); }}
     >
       <div className="flex flex-col sm:flex-row w-full h-full max-w-5xl max-h-[96vh] mx-auto rounded-lg overflow-hidden shadow-2xl">
