@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { GifModal } from "./GifModal";
 import type { Album } from "@/types";
 
@@ -23,15 +24,7 @@ export function RandomAlbumButton({ albums }: Props) {
         aria-label="Random album"
         title="Roll for a random album"
       >
-        {/* Dice icon */}
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <rect x="2" y="2" width="20" height="20" rx="3" ry="3"/>
-          <circle cx="8"  cy="8"  r="1.2" fill="currentColor" stroke="none"/>
-          <circle cx="16" cy="8"  r="1.2" fill="currentColor" stroke="none"/>
-          <circle cx="8"  cy="16" r="1.2" fill="currentColor" stroke="none"/>
-          <circle cx="16" cy="16" r="1.2" fill="currentColor" stroke="none"/>
-          <circle cx="12" cy="12" r="1.2" fill="currentColor" stroke="none"/>
-        </svg>
+        <Image src="/dice.png" alt="Random album" width={20} height={20} className="opacity-50 hover:opacity-100 transition-opacity" />
       </button>
 
       {picked && (

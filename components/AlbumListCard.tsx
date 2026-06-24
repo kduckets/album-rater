@@ -178,6 +178,9 @@ export function AlbumListCard({ album, allAlbums }: AlbumListCardProps) {
             <p className="text-zinc-400 text-xs mt-3">
               Miles Takes Years{album.year ? ` · ${album.year}` : ""}
             </p>
+            <p className="text-zinc-500 text-[11px] mt-0.5">
+              posted by <span className="text-zinc-400">Johnson</span>
+            </p>
           </div>
 
           {/* Action strip */}
