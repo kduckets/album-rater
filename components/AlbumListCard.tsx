@@ -20,11 +20,11 @@ export function AlbumListCard({ album, allAlbums }: AlbumListCardProps) {
   const [gifModalOpen, setGifModalOpen] = useState(false);
   const [artworkError, setArtworkError] = useState(false);
 
-  const commentCount = useAlbumStore((s) => (s.comments[album.id] ?? []).length);
-  const rating       = useAlbumStore((s) => s.ratings[album.id] ?? 0);
+  const rating = useAlbumStore((s) => s.ratings[album.id] ?? 0);
 
-  const average    = useAveragesStore((s) => s.averages[album.id] ?? 0);
-  const setAverage = useAveragesStore((s) => s.setAverage);
+  const average       = useAveragesStore((s) => s.averages[album.id] ?? 0);
+  const commentCount  = useAveragesStore((s) => s.commentCounts[album.id] ?? 0);
+  const setAverage    = useAveragesStore((s) => s.setAverage);
 
   // Animate the score circle counting up/down to the community average
   const [displayAvg, setDisplayAvg] = useState(0);

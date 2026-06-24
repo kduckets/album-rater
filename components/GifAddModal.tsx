@@ -52,7 +52,14 @@ export function GifAddModal({ albumId, onClose }: GifAddModalProps) {
       if (!preview) handlePreview();
       return;
     }
-    addComment(albumId, preview);
+    addComment(albumId, {
+      id: crypto.randomUUID(),
+      albumId,
+      gifUrl: preview,
+      timestamp: Date.now(),
+      author: "",
+      visitorId: "",
+    });
     onClose();
   }
 

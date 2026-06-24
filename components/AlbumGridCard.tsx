@@ -12,9 +12,9 @@ const FALLBACK_IMG = "/miles-davis.png";
 export function AlbumGridCard({ album, allAlbums }: { album: Album; allAlbums: Album[] }) {
   const [modalOpen, setModalOpen] = useState(false);
   const [artErr, setArtErr] = useState(false);
-  const rating  = useAlbumStore((s) => s.ratings[album.id] ?? 0);
-  const average = useAveragesStore((s) => s.averages[album.id] ?? 0);
-  const commentCount = useAlbumStore((s) => (s.comments[album.id] ?? []).length);
+  const rating       = useAlbumStore((s) => s.ratings[album.id] ?? 0);
+  const average      = useAveragesStore((s) => s.averages[album.id] ?? 0);
+  const commentCount = useAveragesStore((s) => s.commentCounts[album.id] ?? 0);
 
   return (
     <>
@@ -58,7 +58,7 @@ export function AlbumGridCard({ album, allAlbums }: { album: Album; allAlbums: A
         )}
 
         {/* Hover overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-2 pointer-events-none">
+        <div className="absolute inset-0 bg-linear-to-t from-black/90 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-2 pointer-events-none">
           <p className="text-white text-[11px] font-semibold leading-snug line-clamp-2">{album.title}</p>
           <p className="text-zinc-400 text-[10px]">
             {album.year || "—"}

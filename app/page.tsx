@@ -40,6 +40,22 @@ async function fetchDescriptions(): Promise<Map<string, string>> {
   return map;
 }
 
+// Fuzzy description lookup: exact → prefix → space-collapsed substring
+function findDesc(descMap: Map<string, string>, year: number, title: string): string | undefined {
+  const norm = normalizeForDesc(title);
+  const exact = descMap.get(`${year}-${norm}`);
+  if (exact) return exact;
+  const normNoSpaces = norm.replace(/ /g, "");
+  for (const [key, notes] of descMap) {
+    const dash = key.indexOf("-");
+    if (parseInt(key.slice(0, dash)) !== year) continue;
+    const keyTitle = key.slice(dash + 1);
+    if (keyTitle.startsWith(norm)) return notes;
+    if (normNoSpaces.length >= 5 && keyTitle.replace(/ /g, "").includes(normNoSpaces)) return notes;
+  }
+  return undefined;
+}
+
 async function fetchItunesArtwork(): Promise<Map<string, string>> {
   const map = new Map<string, string>();
   try {
@@ -105,7 +121,7 @@ export default async function Home() {
     artworkUrl: artworkMap.get(normalizeTitle(entry.title)) ?? lastFmMap.get(entry.title) ?? "",
     label: entry.label,
     type: entry.type,
-    description: descMap.get(`${entry.year}-${normalizeForDesc(entry.title)}`),
+    description: findDesc(descMap, entry.year, entry.title),
   }));
 
   // Stable ID map so studio albums share IDs in both views
@@ -120,7 +136,7 @@ export default async function Home() {
     artworkUrl: artworkMap.get(normalizeTitle(entry.title)) ?? "",
     label: entry.label,
     type: entry.type,
-    description: descMap.get(`${entry.year}-${normalizeForDesc(entry.title)}`),
+    description: findDesc(descMap, entry.year, entry.title),
   }));
 
   const batches: Batch[] = [

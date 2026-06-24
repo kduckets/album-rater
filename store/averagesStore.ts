@@ -4,12 +4,15 @@ import { create } from "zustand";
 
 interface AveragesStore {
   averages: Record<string, number>;
+  commentCounts: Record<string, number>;
   fetchAverages: (albumIds: string[]) => Promise<void>;
   setAverage: (albumId: string, avg: number | null) => void;
+  setCommentCount: (albumId: string, count: number) => void;
 }
 
 export const useAveragesStore = create<AveragesStore>((set) => ({
   averages: {},
+  commentCounts: {},
 
   fetchAverages: async (albumIds) => {
     try {
@@ -19,8 +22,11 @@ export const useAveragesStore = create<AveragesStore>((set) => ({
         body: JSON.stringify({ ids: albumIds }),
       });
       const data = await res.json();
-      set({ averages: data.averages ?? {} });
-    } catch { /* silently ignore — averages stay empty */ }
+      set({
+        averages: data.averages ?? {},
+        commentCounts: data.commentCounts ?? {},
+      });
+    } catch { /* silently ignore */ }
   },
 
   setAverage: (albumId, avg) =>
@@ -30,4 +36,9 @@ export const useAveragesStore = create<AveragesStore>((set) => ({
       else next[albumId] = avg;
       return { averages: next };
     }),
+
+  setCommentCount: (albumId, count) =>
+    set((state) => ({
+      commentCounts: { ...state.commentCounts, [albumId]: count },
+    })),
 }));

@@ -23,6 +23,8 @@ export interface GifComment {
   albumId: string
   gifUrl: string
   timestamp: number
+  author: string      // "" means anonymous
+  visitorId: string   // owner identifier
 }
 
 export type SortOrder  = 'new' | 'top' | 'comments' | 'stars'
