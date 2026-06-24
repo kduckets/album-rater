@@ -132,37 +132,87 @@ export function InlineStarRating({ albumId, compact = false }: Props) {
     </svg>
   );
 
+  const trackBg = rating > 0
+    ? `linear-gradient(to right, #f59e0b ${rating}%, #27272a ${rating}%)`
+    : "#27272a";
+
+  function handleSliderChange(e: React.ChangeEvent<HTMLInputElement>) {
+    if (!hasSetUsername()) return;
+    setRating(albumId, Number(e.target.value));
+  }
+
+  const slider = (
+    <input
+      type="range"
+      min={0}
+      max={100}
+      value={rating}
+      onChange={handleSliderChange}
+      onClick={() => !hasSetUsername() && nudgeUser()}
+      className="rating-slider w-full h-1.5 rounded-full appearance-none focus:outline-none"
+      style={{ background: trackBg }}
+    />
+  );
+
   if (compact) {
     return (
-      <div className="flex items-center gap-2.5">
-        {dial}
-        <div className="flex flex-col gap-0.5">
-          <span className={`text-base font-bold tabular-nums leading-none ${rating > 0 ? "text-amber-400" : "text-zinc-600"}`}>
+      <div className="flex items-center gap-2.5 flex-1">
+        {/* Mobile: slider */}
+        <div className="flex items-center gap-2.5 flex-1 sm:hidden">
+          <span className={`text-sm font-bold tabular-nums w-7 text-right shrink-0 leading-none ${rating > 0 ? "text-amber-400" : "text-zinc-600"}`}>
             {rating > 0 ? rating : "—"}
           </span>
-          {nudge && <span className="text-zinc-400 text-[10px]">Set a username</span>}
+          {slider}
+          {nudge && <span className="text-zinc-400 text-[10px] shrink-0">Set a username</span>}
+        </div>
+        {/* Desktop: dial */}
+        <div className="hidden sm:flex items-center gap-2.5">
+          {dial}
+          <div className="flex flex-col gap-0.5">
+            <span className={`text-base font-bold tabular-nums leading-none ${rating > 0 ? "text-amber-400" : "text-zinc-600"}`}>
+              {rating > 0 ? rating : "—"}
+            </span>
+            {nudge && <span className="text-zinc-400 text-[10px]">Set a username</span>}
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div>
-      <div className="flex items-center gap-3">
-        {dial}
-        <div>
-          <div className="flex items-baseline gap-1.5">
-            <span className={`text-2xl font-bold tabular-nums leading-none ${rating > 0 ? "text-amber-400" : "text-zinc-600"}`}>
+    <div className="w-full">
+      {/* Mobile: slider */}
+      <div className="sm:hidden">
+        <div className="flex items-center justify-between mb-2">
+          <p className="text-[10px] uppercase tracking-widest text-zinc-400 font-semibold">Your rating</p>
+          <div className="flex items-center gap-1.5">
+            {rating > 0 && <span className="text-zinc-500 text-[11px]">{getLabel(rating)}</span>}
+            <span className={`text-xl font-bold leading-none tabular-nums ${rating > 0 ? "text-amber-400" : "text-zinc-600"}`}>
               {rating > 0 ? rating : "—"}
             </span>
-            {rating > 0 && <span className="text-zinc-600 text-xs">/100</span>}
           </div>
-          <p className="text-[10px] uppercase tracking-widest font-semibold mt-1 text-zinc-500">
-            {rating > 0 ? getLabel(rating) : "your rating"}
-          </p>
         </div>
+        {slider}
+        {nudge && <p className="text-[11px] mt-1.5 text-zinc-400">Set a username to rate</p>}
       </div>
-      {nudge && <p className="text-[11px] mt-2 text-zinc-400">Set a username to rate</p>}
+      {/* Desktop: dial */}
+      <div className="hidden sm:block">
+        <div className="flex items-center gap-3">
+          {dial}
+          <div>
+            <div className="flex items-baseline gap-1.5">
+              <span className={`text-2xl font-bold tabular-nums leading-none ${rating > 0 ? "text-amber-400" : "text-zinc-600"}`}>
+                {rating > 0 ? rating : "—"}
+              </span>
+              {rating > 0 && <span className="text-zinc-600 text-xs">/100</span>}
+            </div>
+            <p className="text-[10px] uppercase tracking-widest font-semibold mt-1 text-zinc-500">
+              {rating > 0 ? getLabel(rating) : "your rating"}
+            </p>
+          </div>
+        </div>
+        {nudge && <p className="text-[11px] mt-2 text-zinc-400">Set a username to rate</p>}
+      </div>
     </div>
   );
 }
