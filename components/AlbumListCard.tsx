@@ -9,6 +9,9 @@ import { useAveragesStore } from "@/store/averagesStore";
 import { getEffectiveUserId } from "@/lib/identity";
 import type { Album } from "@/types";
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-/i;
+function displayName(userId: string) { return UUID_RE.test(userId) ? "Anonymous" : userId; }
+
 interface AlbumListCardProps {
   album: Album;
   allAlbums: Album[];
@@ -19,11 +22,15 @@ const FALLBACK_IMG = "/miles-davis.png";
 export function AlbumListCard({ album, allAlbums }: AlbumListCardProps) {
   const [gifModalOpen, setGifModalOpen] = useState(false);
   const [artworkError, setArtworkError] = useState(false);
+  const [showRaters, setShowRaters] = useState(false);
+  const [raters, setRaters] = useState<{ userId: string; rating: number }[] | null>(null);
+  const popoverRef = useRef<HTMLDivElement>(null);
 
   const rating = useAlbumStore((s) => s.ratings[album.id] ?? 0);
 
   const average       = useAveragesStore((s) => s.averages[album.id] ?? 0);
   const commentCount  = useAveragesStore((s) => s.commentCounts[album.id] ?? 0);
+  const raterCount    = useAveragesStore((s) => s.raterCounts[album.id] ?? 0);
   const setAverage    = useAveragesStore((s) => s.setAverage);
 
   // Animate the score circle counting up/down to the community average
@@ -67,6 +74,27 @@ export function AlbumListCard({ album, allAlbums }: AlbumListCardProps) {
       })
       .catch(() => {});
   }, [rating, album.id, setAverage]);
+
+  // Close raters popover when clicking outside
+  useEffect(() => {
+    if (!showRaters) return;
+    function handler(e: MouseEvent) {
+      if (popoverRef.current && !popoverRef.current.contains(e.target as Node)) setShowRaters(false);
+    }
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [showRaters]);
+
+  async function openRaters() {
+    setShowRaters((v) => !v);
+    if (raters !== null) return;
+    const res = await fetch(`/api/album-ratings?albumId=${encodeURIComponent(album.id)}`);
+    const data = await res.json();
+    const list = Object.entries(data.ratings as Record<string, number>)
+      .map(([userId, r]) => ({ userId, rating: r }))
+      .sort((a, b) => b.rating - a.rating);
+    setRaters(list);
+  }
 
   const spotifyUrl = `https://open.spotify.com/search/${encodeURIComponent(
     `${album.title} Miles Davis`
@@ -155,10 +183,17 @@ export function AlbumListCard({ album, allAlbums }: AlbumListCardProps) {
           {/* Action strip */}
           <div className="w-12 sm:w-14 shrink-0 flex flex-col items-center py-4 gap-4 bg-zinc-100 border-l border-zinc-200">
             {/* Community average */}
-            <div className="flex flex-col items-center gap-1.5">
-              <div className="w-8 h-8 bg-black rounded-full flex items-center justify-center text-white text-sm font-bold shrink-0">
+            <div className="flex flex-col items-center gap-1.5 relative" ref={popoverRef}>
+              <button
+                onClick={openRaters}
+                className="w-8 h-8 bg-black rounded-full flex items-center justify-center text-white text-sm font-bold shrink-0 cursor-pointer hover:bg-zinc-800 transition-colors"
+                title={raterCount > 0 ? `${raterCount} rating${raterCount !== 1 ? "s" : ""}` : "No ratings yet"}
+              >
                 {displayAvg > 0 ? displayAvg : "—"}
-              </div>
+              </button>
+              {raterCount > 0 && (
+                <span className="text-[9px] text-zinc-500 leading-none">{raterCount}</span>
+              )}
               <div className="flex">
                 {[1, 2, 3, 4, 5].map((s) => (
                   <span
@@ -167,6 +202,24 @@ export function AlbumListCard({ album, allAlbums }: AlbumListCardProps) {
                   >★</span>
                 ))}
               </div>
+
+              {/* Raters popover */}
+              {showRaters && (
+                <div className="absolute right-0 top-full mt-1 z-50 w-44 bg-zinc-950 border border-zinc-800 rounded-lg shadow-2xl py-2 text-left">
+                  {raters === null ? (
+                    <p className="px-3 py-1 text-zinc-600 text-xs">Loading…</p>
+                  ) : raters.length === 0 ? (
+                    <p className="px-3 py-1 text-zinc-600 text-xs">No ratings yet</p>
+                  ) : (
+                    raters.map(({ userId, rating: r }) => (
+                      <div key={userId} className="flex items-center justify-between px-3 py-1">
+                        <span className="text-zinc-300 text-xs truncate max-w-20">{displayName(userId)}</span>
+                        <span className="text-amber-400 text-xs tracking-tight shrink-0">{"★".repeat(r)}{"☆".repeat(5 - r)}</span>
+                      </div>
+                    ))
+                  )}
+                </div>
+              )}
             </div>
 
             {/* GIF comments */}

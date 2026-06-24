@@ -15,10 +15,18 @@ export async function POST(req: NextRequest) {
 
   const averages: Record<string, number> = {};
   const commentCounts: Record<string, number> = {};
+  const raterCounts: Record<string, number> = {};
 
   ids.forEach((id, i) => {
-    const avg = avgFromHgetall(results[i * 2]?.result);
+    const raw = results[i * 2]?.result;
+    const avg = avgFromHgetall(raw);
     if (avg !== null) averages[id] = avg;
+    // Count valid raters from the same HGETALL
+    if (Array.isArray(raw)) {
+      let n = 0;
+      for (let j = 1; j < raw.length; j += 2) { const v = Number(raw[j]); if (v >= 1 && v <= 5) n++; }
+      if (n > 0) raterCounts[id] = n;
+    }
     const count = typeof results[i * 2 + 1]?.result === "number"
       ? (results[i * 2 + 1].result as number)
       : 0;
@@ -35,5 +43,5 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  return NextResponse.json({ averages, commentCounts, lastCommentAt });
+  return NextResponse.json({ averages, commentCounts, lastCommentAt, raterCounts });
 }

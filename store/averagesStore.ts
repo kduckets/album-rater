@@ -6,6 +6,7 @@ interface AveragesStore {
   averages: Record<string, number>;
   commentCounts: Record<string, number>;
   lastCommentAt: Record<string, number>;
+  raterCounts: Record<string, number>;
   fetchAverages: (albumIds: string[]) => Promise<void>;
   setAverage: (albumId: string, avg: number | null) => void;
   setCommentCount: (albumId: string, count: number) => void;
@@ -16,6 +17,7 @@ export const useAveragesStore = create<AveragesStore>((set) => ({
   averages: {},
   commentCounts: {},
   lastCommentAt: {},
+  raterCounts: {},
 
   fetchAverages: async (albumIds) => {
     try {
@@ -29,6 +31,7 @@ export const useAveragesStore = create<AveragesStore>((set) => ({
         averages: data.averages ?? {},
         commentCounts: data.commentCounts ?? {},
         lastCommentAt: data.lastCommentAt ?? {},
+        raterCounts: data.raterCounts ?? {},
       });
     } catch { /* silently ignore */ }
   },
