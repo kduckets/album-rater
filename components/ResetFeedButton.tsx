@@ -7,12 +7,12 @@ export function ResetFeedButton() {
       className="flex items-center gap-2 cursor-pointer group"
       aria-label="Back to feed"
     >
-      <div className="relative w-10 h-10 shrink-0 overflow-hidden">
+      <div className="relative w-8 h-8 sm:w-10 sm:h-10 shrink-0 overflow-hidden">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src="/flockify.png"
           alt="Flockify logo"
-          className="h-10 w-auto invert"
+          className="h-8 sm:h-10 w-auto invert"
           style={{ maxWidth: "none" }}
         />
         <span className="absolute bottom-0 right-0 text-[6px] text-white/40 font-mono leading-none">4.2.0</span>
