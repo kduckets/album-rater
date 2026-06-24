@@ -116,7 +116,31 @@ export function GifModal({ album, allAlbums, onClose }: GifModalProps) {
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm overflow-x-hidden"
       onClick={(e) => { if (e.target === backdropRef.current) onClose(); }}
     >
-      <div className="flex flex-col sm:flex-row w-full h-full max-w-5xl max-h-[96vh] mx-auto rounded-lg overflow-hidden shadow-2xl">
+      <div className="flex flex-col w-full h-full max-w-5xl max-h-[96vh] mx-auto rounded-lg overflow-hidden shadow-2xl">
+
+        {/* ── Header: always at top, full width ── */}
+        <div className="flex items-center justify-between px-5 py-3 border-b border-zinc-900 shrink-0 bg-black">
+          <button
+            onClick={onClose}
+            className="flex items-center gap-2 cursor-pointer group"
+            aria-label="Back to feed"
+          >
+            <div className="w-8 h-8 overflow-hidden shrink-0 opacity-90 group-hover:opacity-100 transition-opacity">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/flockify.png" alt="Flockify420" className="h-8 w-auto invert" style={{ maxWidth: "none" }} />
+            </div>
+            <span className="text-white font-bold text-sm tracking-wide">
+              Flockify<span className="text-zinc-500 font-normal text-xs ml-0.5">4.2.0</span>
+            </span>
+          </button>
+          <button
+            onClick={onClose}
+            className="text-zinc-600 hover:text-white transition-colors cursor-pointer text-lg leading-none"
+          >✕</button>
+        </div>
+
+        {/* ── Body: art + details side by side (or stacked on mobile) ── */}
+        <div className="flex flex-col sm:flex-row flex-1 overflow-hidden min-h-0">
 
         {/* ── Album art: full-width on mobile (top), left column on sm+ ── */}
         <a
@@ -138,27 +162,6 @@ export function GifModal({ album, allAlbums, onClose }: GifModalProps) {
 
         {/* ── Right: details panel ── */}
         <div className="flex-1 bg-black text-white flex flex-col overflow-hidden min-h-0">
-
-          {/* Header */}
-          <div className="flex items-center justify-between px-5 py-3 border-b border-zinc-900 shrink-0">
-            <button
-              onClick={onClose}
-              className="flex items-center gap-2 cursor-pointer group"
-              aria-label="Back to feed"
-            >
-              <div className="w-8 h-8 overflow-hidden shrink-0 opacity-90 group-hover:opacity-100 transition-opacity">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/flockify.png" alt="Flockify420" className="h-8 w-auto invert" style={{ maxWidth: "none" }} />
-              </div>
-              <span className="text-white font-bold text-sm tracking-wide">
-                Flockify<span className="text-zinc-500 font-normal text-xs ml-0.5">4.2.0</span>
-              </span>
-            </button>
-            <button
-              onClick={onClose}
-              className="text-zinc-600 hover:text-white transition-colors cursor-pointer text-lg leading-none"
-            >✕</button>
-          </div>
 
           <div className="flex-1 overflow-y-auto px-6 pb-8 space-y-5">
 
@@ -356,6 +359,7 @@ export function GifModal({ album, allAlbums, onClose }: GifModalProps) {
               </>
             )}
           </div>
+        </div>
         </div>
       </div>
     </div>
