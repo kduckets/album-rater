@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Flockify420",
-    template: "%s | Flockify420",
+    default: "flockify discographies",
+    template: "%s | flockify discographies",
   },
   description: "Like Flockify, but different.",
   icons: {
@@ -23,15 +23,15 @@ export const metadata: Metadata = {
     apple: "/flockify-icon-only.png",
   },
   openGraph: {
-    title: "Flockify 4.2.0",
+    title: "flockify discographies",
     description: "Like Flockify, but different.",
-    siteName: "Flockify 4.2.0",
+    siteName: "flockify discographies",
     type: "website",
     images: [{ url: "/flockify-icon-only.png" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Flockify 4.2.0",
+    title: "flockify discographies",
     description: "Like Flockify, but different.",
     images: ["/flockify-icon-only.png"],
   },

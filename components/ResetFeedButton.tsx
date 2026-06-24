@@ -15,10 +15,10 @@ export function ResetFeedButton() {
           className="h-8 w-auto invert"
           style={{ maxWidth: "none" }}
         />
-        <span className="absolute bottom-0 right-0 text-[6px] text-white/40 font-mono leading-none">420</span>
+        <span className="absolute bottom-0 right-0 text-[6px] text-white/40 font-mono leading-none">4.2.0</span>
       </div>
       <span className="text-white font-bold text-sm tracking-wide">
-        Flockify<span className="text-zinc-500 font-normal text-xs ml-0.5">4.2.0</span>
+        flockify<span className="text-zinc-500 font-normal text-xs ml-0.5">discographies</span>
       </span>
     </button>
   );
