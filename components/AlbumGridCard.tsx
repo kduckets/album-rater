@@ -37,21 +37,17 @@ export function AlbumGridCard({ album, allAlbums }: { album: Album; allAlbums: A
           {/* Community average */}
           <div className="flex items-center gap-0.5 min-w-0">
             <span className="text-amber-400 text-[10px] leading-none">★</span>
-            <span className="text-white text-[10px] font-semibold leading-none">
-              {average > 0 ? average.toFixed(1) : "—"}
+            <span className="text-white text-[10px] font-semibold leading-none tabular-nums">
+              {average > 0 ? Math.round(average) : "—"}
             </span>
           </div>
 
-          {/* User rating bar — 5 segments */}
-          <div className="flex gap-px flex-1 mx-1">
-            {[1, 2, 3, 4, 5].map((s) => (
-              <div
-                key={s}
-                className={`flex-1 h-1 rounded-sm transition-colors ${
-                  rating >= s ? "bg-amber-400/90" : "bg-white/15"
-                }`}
-              />
-            ))}
+          {/* User rating bar — continuous fill */}
+          <div className="flex-1 mx-1 h-1 rounded-full bg-white/15 overflow-hidden">
+            <div
+              className="h-full rounded-full bg-amber-400/90 transition-all duration-300"
+              style={{ width: rating > 0 ? `${rating}%` : "0%" }}
+            />
           </div>
 
           {/* Comment count */}

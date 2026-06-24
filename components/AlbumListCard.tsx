@@ -41,14 +41,18 @@ export function AlbumListCard({ album, allAlbums }: AlbumListCardProps) {
   useEffect(() => {
     if (animRef.current) clearInterval(animRef.current);
     if (targetAvg === displayAvg) return;
-    const step = targetAvg > displayAvg ? 1 : -1;
     animRef.current = setInterval(() => {
       setDisplayAvg((prev) => {
+        const diff = targetAvg - prev;
+        const step = Math.sign(diff) * Math.max(1, Math.ceil(Math.abs(diff) / 15));
         const next = prev + step;
-        if (next === targetAvg) clearInterval(animRef.current!);
+        if ((step > 0 && next >= targetAvg) || (step < 0 && next <= targetAvg)) {
+          clearInterval(animRef.current!);
+          return targetAvg;
+        }
         return next;
       });
-    }, 80);
+    }, 24);
     return () => { if (animRef.current) clearInterval(animRef.current); };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [targetAvg]);
@@ -194,7 +198,7 @@ export function AlbumListCard({ album, allAlbums }: AlbumListCardProps) {
             >
               <button
                 onClick={openRaters}
-                className="w-8 h-8 bg-black rounded-full flex items-center justify-center text-white text-sm font-bold shrink-0 cursor-pointer hover:bg-zinc-800 transition-colors"
+                className="w-8 h-8 bg-black rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0 cursor-pointer hover:bg-zinc-800 transition-colors tabular-nums"
                 title={raterCount > 0 ? `${raterCount} rating${raterCount !== 1 ? "s" : ""}` : "No ratings yet"}
               >
                 {displayAvg > 0 ? displayAvg : "—"}
@@ -202,13 +206,11 @@ export function AlbumListCard({ album, allAlbums }: AlbumListCardProps) {
               {raterCount > 0 && (
                 <span className="text-[9px] text-zinc-500 leading-none">{raterCount}</span>
               )}
-              <div className="flex">
-                {[1, 2, 3, 4, 5].map((s) => (
-                  <span
-                    key={s}
-                    className={`text-[9px] leading-none ${rating >= s ? "text-amber-400" : "text-zinc-300"}`}
-                  >★</span>
-                ))}
+              <div className="w-8 h-1 rounded-full bg-zinc-700 overflow-hidden">
+                <div
+                  className="h-full rounded-full bg-amber-400 transition-all duration-300"
+                  style={{ width: rating > 0 ? `${rating}%` : "0%" }}
+                />
               </div>
 
               {/* Raters popover */}
@@ -222,7 +224,7 @@ export function AlbumListCard({ album, allAlbums }: AlbumListCardProps) {
                     raters.map(({ userId, rating: r }) => (
                       <div key={userId} className="flex items-center justify-between px-3 py-1">
                         <span className="text-zinc-300 text-xs truncate max-w-20">{displayName(userId)}</span>
-                        <span className="text-amber-400 text-xs tracking-tight shrink-0">{"★".repeat(r)}{"☆".repeat(5 - r)}</span>
+                        <span className="text-amber-400 text-xs font-bold tabular-nums shrink-0">{r}</span>
                       </div>
                     ))
                   )}

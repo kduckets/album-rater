@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useAlbumStore } from "@/store/albumStore";
 import { useAveragesStore } from "@/store/averagesStore";
 import { getUsername, setUsername, hasSetUsername, getEffectiveUserId } from "@/lib/identity";
+import { InlineStarRating } from "./InlineStarRating";
 import type { Album, GifComment } from "@/types";
 
 interface GifModalProps {
@@ -50,7 +51,6 @@ export function GifModal({ album: initialAlbum, allAlbums, onClose }: GifModalPr
   const [posting, setPosting]         = useState(false);
   const [showRaters, setShowRaters]   = useState(false);
   const [raters, setRaters]           = useState<{ userId: string; rating: number }[] | null>(null);
-  const [starHover, setStarHover]     = useState(0);
 
   function navigateTo(next: typeof initialAlbum) {
     setAlbum(next);
@@ -323,26 +323,9 @@ export function GifModal({ album: initialAlbum, allAlbums, onClose }: GifModalPr
                 </p>
               </div>
 
-              {/* Stars (interactive rating) + action bar */}
+              {/* Rating slider + action bar */}
               <div className="flex items-center gap-3">
-                {/* Clickable stars */}
-                <div
-                  className="flex items-center gap-0.5"
-                  onMouseLeave={() => setStarHover(0)}
-                  title={!hasSetUsername() ? "Set a username to rate" : undefined}
-                >
-                  {[1,2,3,4,5].map((s) => (
-                    <button
-                      key={s}
-                      onMouseEnter={() => hasSetUsername() && setStarHover(s)}
-                      onClick={() => hasSetUsername() && setRating(album.id, rating === s ? 0 : s)}
-                      className={`text-xl leading-none transition-transform focus:outline-none ${hasSetUsername() ? "cursor-pointer hover:scale-125" : "cursor-default"}`}
-                      aria-label={`Rate ${s} star${s > 1 ? "s" : ""}`}
-                    >
-                      <span className={(starHover || rating) >= s ? "text-amber-400" : "text-zinc-700"}>★</span>
-                    </button>
-                  ))}
-                </div>
+                <InlineStarRating albumId={album.id} compact />
 
                 {/* Community average — hover to see who rated */}
                 <div
@@ -353,10 +336,10 @@ export function GifModal({ album: initialAlbum, allAlbums, onClose }: GifModalPr
                 >
                   <button
                     onClick={openRaters}
-                    className="w-8 h-8 bg-white rounded-full flex items-center justify-center text-black text-sm font-bold shrink-0 cursor-pointer hover:bg-zinc-200 transition-colors"
+                    className="w-8 h-8 bg-white rounded-full flex items-center justify-center text-black text-xs font-bold shrink-0 cursor-pointer hover:bg-zinc-200 transition-colors tabular-nums"
                     title={raterCount > 0 ? `Community avg · ${raterCount} rating${raterCount !== 1 ? "s" : ""}` : "No ratings yet"}
                   >
-                    {average > 0 ? average.toFixed(1) : "—"}
+                    {average > 0 ? Math.round(average) : "—"}
                   </button>
                   {raterCount > 0 && (
                     <span className="absolute -bottom-4 left-1/2 -translate-x-1/2 text-[9px] text-zinc-600 whitespace-nowrap">
@@ -374,7 +357,7 @@ export function GifModal({ album: initialAlbum, allAlbums, onClose }: GifModalPr
                         raters.map(({ userId, rating: r }) => (
                           <div key={userId} className="flex items-center justify-between px-3 py-1.5">
                             <span className="text-zinc-300 text-xs truncate max-w-24">{displayName(userId)}</span>
-                            <span className="text-amber-400 text-xs tracking-tight shrink-0">{"★".repeat(r)}{"☆".repeat(5 - r)}</span>
+                            <span className="text-amber-400 text-xs font-bold tabular-nums shrink-0">{r}</span>
                           </div>
                         ))
                       )}
