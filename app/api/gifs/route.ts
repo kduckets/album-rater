@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-// Free GIPHY dev key — replace with GIPHY_API_KEY env var for production
-const KEY = process.env.GIPHY_API_KEY ?? "dc6zaTOxFJmzC";
+const KEY = process.env.TENOR_API_KEY ?? "LIVDSRZULELA";
 
 export async function GET(req: NextRequest) {
   const q = req.nextUrl.searchParams.get("q")?.trim();
@@ -9,18 +8,19 @@ export async function GET(req: NextRequest) {
 
   try {
     const url =
-      `https://api.giphy.com/v1/gifs/search` +
-      `?api_key=${KEY}&q=${encodeURIComponent(q)}&limit=20&rating=g&lang=en`;
+      `https://api.tenor.com/v1/search` +
+      `?key=${KEY}&q=${encodeURIComponent(q)}&limit=20&contentfilter=medium&media_filter=minimal`;
     const res = await fetch(url, { next: { revalidate: 300 } });
     if (!res.ok) return NextResponse.json({ gifs: [] });
     const data = await res.json();
 
-    type GiphyImage = { url?: string; webp?: string };
-    type GiphyItem = { id: string; title: string; images: Record<string, GiphyImage> };
+    type TenorMedia = { url: string; dims: number[] };
+    type TenorItem = { id: string; title: string; media: Array<Record<string, TenorMedia>> };
 
-    const gifs = (data.data as GiphyItem[]).flatMap((item) => {
-      const url = item.images.fixed_height?.url ?? item.images.original?.url ?? "";
-      const preview = item.images.fixed_height_small?.url ?? url;
+    const gifs = (data.results as TenorItem[]).flatMap((item) => {
+      const media = item.media[0];
+      const url     = media?.gif?.url ?? "";
+      const preview = media?.tinygif?.url ?? url;
       return url ? [{ id: item.id, title: item.title, url, preview }] : [];
     });
 
