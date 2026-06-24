@@ -56,7 +56,8 @@ export function GifModal({ album, allAlbums, onClose }: GifModalProps) {
 
   const rating     = useAlbumStore((s) => s.ratings[album.id] ?? 0);
   const setRating  = useAlbumStore((s) => s.setRating);
-  const setCommentCount = useAveragesStore((s) => s.setCommentCount);
+  const setCommentCount   = useAveragesStore((s) => s.setCommentCount);
+  const setLastCommentAt  = useAveragesStore((s) => s.setLastCommentAt);
 
   const visitorId  = getVisitorId();
 
@@ -122,6 +123,7 @@ export function GifModal({ album, allAlbums, onClose }: GifModalProps) {
         const updated = [...comments, data.comment];
         setComments(updated);
         setCommentCount(album.id, updated.length);
+        setLastCommentAt(album.id, data.comment.timestamp);
       }
     } catch { /* fail silently */ }
     setPosting(false);

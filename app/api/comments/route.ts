@@ -35,7 +35,10 @@ export async function POST(req: NextRequest) {
     timestamp: Date.now(),
   };
 
-  await pipeline([["HSET", commentKey(albumId), comment.id, JSON.stringify(comment)]]);
+  await pipeline([
+    ["HSET", commentKey(albumId), comment.id, JSON.stringify(comment)],
+    ["HSET", "c:last-comment", albumId, String(comment.timestamp)],
+  ]);
   return NextResponse.json({ comment });
 }
 

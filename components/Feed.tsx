@@ -65,8 +65,9 @@ export function Feed({ batches, allDiscography }: FeedProps) {
   const ratings  = useAlbumStore((s) => s.ratings);
   const comments = useAlbumStore((s) => s.comments);
 
-  const averages      = useAveragesStore((s) => s.averages);
-  const fetchAverages = useAveragesStore((s) => s.fetchAverages);
+  const averages       = useAveragesStore((s) => s.averages);
+  const lastCommentAt  = useAveragesStore((s) => s.lastCommentAt);
+  const fetchAverages  = useAveragesStore((s) => s.fetchAverages);
 
   const batch      = batches[0];
   const gridSource = batch.albums; // studio albums only in both views
@@ -84,11 +85,11 @@ export function Feed({ batches, allDiscography }: FeedProps) {
       switch (sortOrder) {
         case "new":      return b.year - a.year;
         case "top":      return (averages[b.id] ?? 0) - (averages[a.id] ?? 0);
-        case "comments": return (comments[b.id]?.length ?? 0) - (comments[a.id]?.length ?? 0);
+        case "comments": return (lastCommentAt[b.id] ?? 0) - (lastCommentAt[a.id] ?? 0);
         case "stars":    return a.year - b.year;
       }
     });
-  }, [batch.albums, eraFilter, sortOrder, averages, comments]);
+  }, [batch.albums, eraFilter, sortOrder, averages, lastCommentAt]);
 
   // Grid view: full discography with extra filters
   const gridAlbums = useMemo(() => {
@@ -105,11 +106,11 @@ export function Feed({ batches, allDiscography }: FeedProps) {
       switch (sortOrder) {
         case "new":      return b.year - a.year;
         case "top":      return (averages[b.id] ?? 0) - (averages[a.id] ?? 0);
-        case "comments": return (comments[b.id]?.length ?? 0) - (comments[a.id]?.length ?? 0);
+        case "comments": return (lastCommentAt[b.id] ?? 0) - (lastCommentAt[a.id] ?? 0);
         case "stars":    return a.year - b.year;
       }
     });
-  }, [gridSource, eraFilter, labelFilter, statusFilter, sortOrder, averages, comments, ratings]);
+  }, [gridSource, eraFilter, labelFilter, statusFilter, sortOrder, averages, lastCommentAt, ratings]);
 
   const ratedCount = batch.albums.filter((a) => ratings[a.id]).length;
   const totalGifs  = Object.values(comments).reduce((n, arr) => n + arr.length, 0);
