@@ -58,7 +58,7 @@ function getEra(year: number): EraFilter {
 export function Feed({ batches, allDiscography }: FeedProps) {
   const [viewMode, setViewMode]         = useState<ViewMode>("classic");
   const [eraFilter, setEraFilter]       = useState<EraFilter>("all");
-  const [sortOrder, setSortOrder]       = useState<SortOrder>("stars");
+  const [sortOrder, setSortOrder]       = useState<SortOrder>("new");
   const [labelFilter, setLabelFilter]   = useState<LabelFilter>("all");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
 
@@ -76,10 +76,10 @@ export function Feed({ batches, allDiscography }: FeedProps) {
     fetchAverages(gridSource.map((a) => a.id));
   }, [gridSource, fetchAverages]);
 
-  // Classic view: studio albums
+  // Classic view: reviewed studio albums only
   const filteredAndSorted = useMemo(() => {
     const filtered = batch.albums.filter((a) =>
-      eraFilter === "all" ? true : a.year > 0 && getEra(a.year) === eraFilter
+      !!a.description && (eraFilter === "all" ? true : a.year > 0 && getEra(a.year) === eraFilter)
     );
     return [...filtered].sort((a, b) => {
       switch (sortOrder) {
@@ -91,9 +91,9 @@ export function Feed({ batches, allDiscography }: FeedProps) {
     });
   }, [batch.albums, eraFilter, sortOrder, averages, lastCommentAt]);
 
-  // Grid view: full discography with extra filters
+  // Grid view: reviewed albums only, with extra filters
   const gridAlbums = useMemo(() => {
-    let list = gridSource;
+    let list = gridSource.filter((a) => !!a.description);
     if (eraFilter !== "all")
       list = list.filter((a) => a.year > 0 && getEra(a.year) === eraFilter);
     if (labelFilter !== "all")

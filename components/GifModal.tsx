@@ -261,7 +261,7 @@ export function GifModal({ album, allAlbums, onClose }: GifModalProps) {
                   Miles Davis – {album.title}{album.year ? ` (${album.year})` : ""}
                 </a>
                 <p className="text-zinc-500 text-xs mt-1">
-                  posted by <span className="text-zinc-300">you</span> &nbsp;·&nbsp; {album.year || "—"}
+                  posted by <span className="text-zinc-300">Johnson</span> &nbsp;·&nbsp; {album.year || "—"}
                 </p>
               </div>
 
