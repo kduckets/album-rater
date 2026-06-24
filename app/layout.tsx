@@ -17,22 +17,22 @@ export const metadata: Metadata = {
     default: "Flockify420",
     template: "%s | Flockify420",
   },
-  description: "Rate music albums and react with GIFs",
+  description: "Like Flockify, but different.",
   icons: {
     icon: "/flockify.png",
     apple: "/flockify.png",
   },
   openGraph: {
-    title: "Flockify420",
-    description: "Rate music albums and react with GIFs",
-    siteName: "Flockify420",
+    title: "Flockify 4.2.0",
+    description: "Like Flockify, but different.",
+    siteName: "Flockify 4.2.0",
     type: "website",
     images: [{ url: "/flockify.png" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Flockify420",
-    description: "Rate music albums and react with GIFs",
+    title: "Flockify 4.2.0",
+    description: "Like Flockify, but different.",
     images: ["/flockify.png"],
   },
 };
