@@ -25,7 +25,13 @@ function timeAgo(ts: number) {
   return `${d} day${d > 1 ? "s" : ""} ago`;
 }
 
-function SaveIcon() { return <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>; }
+function HeartIcon({ filled }: { filled?: boolean }) {
+  return (
+    <svg width="17" height="17" viewBox="0 0 24 24" fill={filled ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+    </svg>
+  );
+}
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-/i;
 function displayName(userId: string) { return UUID_RE.test(userId) ? "Anonymous" : userId; }
@@ -69,9 +75,9 @@ export function GifModal({ album: initialAlbum, allAlbums, onClose }: GifModalPr
 
   const rating       = useAlbumStore((s) => s.ratings[album.id] ?? 0);
   const setRating    = useAlbumStore((s) => s.setRating);
-  const savedAlbums  = useAlbumStore((s) => s.savedAlbums);
-  const toggleSaved  = useAlbumStore((s) => s.toggleSaved);
-  const isSaved      = savedAlbums.includes(album.id);
+  const favoritedAlbums  = useAlbumStore((s) => s.favoritedAlbums);
+  const toggleFavorited  = useAlbumStore((s) => s.toggleFavorited);
+  const isFavorited      = favoritedAlbums.includes(album.id);
   const average    = useAveragesStore((s) => s.averages[album.id] ?? 0);
   const raterCount = useAveragesStore((s) => s.raterCounts[album.id] ?? 0);
   const setCommentCount   = useAveragesStore((s) => s.setCommentCount);
@@ -146,11 +152,11 @@ export function GifModal({ album: initialAlbum, allAlbums, onClose }: GifModalPr
     setRaters(list);
   }
 
-  async function handleSave() {
+  async function handleFavorite() {
     const userId = getEffectiveUserId();
     if (!userId || !hasSetUsername()) return;
-    const next = !isSaved;
-    toggleSaved(album.id);
+    const next = !isFavorited;
+    toggleFavorited(album.id);
     fetch("/api/collection", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -370,16 +376,16 @@ export function GifModal({ album: initialAlbum, allAlbums, onClose }: GifModalPr
                   )}
                 </div>
 
-                {/* Bookmark / save to collection */}
+                {/* Favorite */}
                 <button
-                  onClick={handleSave}
+                  onClick={handleFavorite}
                   className={`transition-colors cursor-pointer ml-1 ${
-                    isSaved ? "text-white" : "text-zinc-600 hover:text-zinc-300"
+                    isFavorited ? "text-red-500" : "text-zinc-600 hover:text-zinc-300"
                   } ${!hasSetUsername() ? "opacity-30 cursor-not-allowed" : ""}`}
-                  aria-label={isSaved ? "Remove from collection" : "Save to collection"}
-                  title={!hasSetUsername() ? "Set a username to save" : isSaved ? "Remove from collection" : "Save to collection"}
+                  aria-label={isFavorited ? "Remove from favorites" : "Add to favorites"}
+                  title={!hasSetUsername() ? "Set a username to favorite" : isFavorited ? "Remove from favorites" : "Add to favorites"}
                 >
-                  <SaveIcon />
+                  <HeartIcon filled={isFavorited} />
                 </button>
 
                 {/* Streaming links */}

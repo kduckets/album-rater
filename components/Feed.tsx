@@ -35,7 +35,7 @@ const COLUMBIA_LABELS = new Set([
 type ViewMode    = "classic" | "grid";
 type TypeFilter  = "all" | "studio" | "live" | "compilation";
 type LabelFilter = "all" | "Columbia" | "Prestige" | "Blue Note" | "Other";
-type StatusFilter = "all" | "rated" | "unrated" | "saved";
+type StatusFilter = "all" | "rated" | "unrated" | "favorited";
 
 function getLabelGroup(label?: string): "Columbia" | "Prestige" | "Blue Note" | "Other" {
   if (!label) return "Other";
@@ -67,7 +67,7 @@ export function Feed({ batches, allDiscography }: FeedProps) {
 
   const ratings     = useAlbumStore((s) => s.ratings);
   const comments    = useAlbumStore((s) => s.comments);
-  const savedAlbums = useAlbumStore((s) => s.savedAlbums);
+  const favoritedAlbums = useAlbumStore((s) => s.favoritedAlbums);
 
   const averages       = useAveragesStore((s) => s.averages);
   const lastCommentAt  = useAveragesStore((s) => s.lastCommentAt);
@@ -105,7 +105,7 @@ export function Feed({ batches, allDiscography }: FeedProps) {
       if (searchLower && !a.title.toLowerCase().includes(searchLower) && !(a.description ?? "").toLowerCase().includes(searchLower)) return false;
       if (statusFilter === "rated" && !(ratings[a.id] ?? 0)) return false;
       if (statusFilter === "unrated" && (ratings[a.id] ?? 0)) return false;
-      if (statusFilter === "saved" && !savedAlbums.includes(a.id)) return false;
+      if (statusFilter === "favorited" && !favoritedAlbums.includes(a.id)) return false;
       return true;
     });
     const dir = sortDir === "desc" ? 1 : -1;
@@ -116,7 +116,7 @@ export function Feed({ batches, allDiscography }: FeedProps) {
         case "comments": return dir * ((lastCommentAt[b.id] ?? 0) - (lastCommentAt[a.id] ?? 0));
       }
     });
-  }, [batch.albums, eraFilter, sortOrder, sortDir, averages, lastCommentAt, searchLower, statusFilter, ratings, savedAlbums]);
+  }, [batch.albums, eraFilter, sortOrder, sortDir, averages, lastCommentAt, searchLower, statusFilter, ratings, favoritedAlbums]);
 
   // Grid view: reviewed albums only, with extra filters
   const gridAlbums = useMemo(() => {
@@ -133,8 +133,8 @@ export function Feed({ batches, allDiscography }: FeedProps) {
       list = list.filter((a) => (ratings[a.id] ?? 0) > 0);
     if (statusFilter === "unrated")
       list = list.filter((a) => !(ratings[a.id] ?? 0));
-    if (statusFilter === "saved")
-      list = list.filter((a) => savedAlbums.includes(a.id));
+    if (statusFilter === "favorited")
+      list = list.filter((a) => favoritedAlbums.includes(a.id));
     const dir = sortDir === "desc" ? 1 : -1;
     return [...list].sort((a, b) => {
       switch (sortOrder) {
@@ -143,7 +143,7 @@ export function Feed({ batches, allDiscography }: FeedProps) {
         case "comments": return dir * ((lastCommentAt[b.id] ?? 0) - (lastCommentAt[a.id] ?? 0));
       }
     });
-  }, [gridSource, eraFilter, labelFilter, statusFilter, sortOrder, sortDir, averages, lastCommentAt, ratings, savedAlbums, searchLower]);
+  }, [gridSource, eraFilter, labelFilter, statusFilter, sortOrder, sortDir, averages, lastCommentAt, ratings, favoritedAlbums, searchLower]);
 
   const ratedCount = batch.albums.filter((a) => ratings[a.id]).length;
   const totalGifs  = Object.values(comments).reduce((n, arr) => n + arr.length, 0);
@@ -305,14 +305,14 @@ export function Feed({ batches, allDiscography }: FeedProps) {
               {s === "all" ? "All" : s.charAt(0).toUpperCase() + s.slice(1)}
             </button>
           ))}
-          {savedAlbums.length > 0 && (
+          {favoritedAlbums.length > 0 && (
             <button
-              onClick={() => setStatusFilter(statusFilter === "saved" ? "all" : "saved")}
+              onClick={() => setStatusFilter(statusFilter === "favorited" ? "all" : "favorited")}
               className={`shrink-0 px-3 py-1 rounded-full text-[11px] font-semibold tracking-wide transition-colors cursor-pointer ${
-                statusFilter === "saved" ? "bg-amber-400 text-black" : "bg-zinc-900 text-zinc-400 hover:text-white"
+                statusFilter === "favorited" ? "bg-amber-400 text-black" : "bg-zinc-900 text-zinc-400 hover:text-white"
               }`}
             >
-              Saved
+              Favorites
             </button>
           )}
         </div>

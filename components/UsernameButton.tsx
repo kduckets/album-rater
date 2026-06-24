@@ -13,7 +13,7 @@ export function UsernameButton({ albumIds }: Props) {
   const [syncing, setSyncing]   = useState(false);
   const inputRef                = useRef<HTMLInputElement>(null);
   const loadRatings             = useAlbumStore((s) => s.loadRatings);
-  const loadSaved               = useAlbumStore((s) => s.loadSaved);
+  const loadFavorited           = useAlbumStore((s) => s.loadFavorited);
 
   useEffect(() => { setMounted(true); }, []);
   useEffect(() => { if (open) { setInput(getUsername()); setTimeout(() => inputRef.current?.focus(), 50); } }, [open]);
@@ -37,7 +37,7 @@ export function UsernameButton({ albumIds }: Props) {
         const ratingsData = await ratingsRes.json();
         if (ratingsData.ratings) loadRatings(ratingsData.ratings);
         const collectionData = await collectionRes.json();
-        if (Array.isArray(collectionData.saved)) loadSaved(collectionData.saved);
+        if (Array.isArray(collectionData.saved)) loadFavorited(collectionData.saved);
       } catch { /* fail silently */ }
       setSyncing(false);
     }
