@@ -130,13 +130,7 @@ export default async function Home() {
           </span>
         </div>
 
-        <button className="flex items-center gap-2 text-zinc-400 hover:text-white transition-colors cursor-pointer text-sm">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <rect x="3" y="3" width="18" height="18" rx="2" />
-            <path d="M12 8v8M8 12h8" />
-          </svg>
-          <span className="text-xs tracking-wide">post an album</span>
-        </button>
+        <div />
 
         <div className="flex items-center gap-3 text-zinc-500">
           <button className="hover:text-white transition-colors cursor-pointer" aria-label="Search">
