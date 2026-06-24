@@ -95,7 +95,7 @@ export function GifModal({ album, allAlbums, onClose }: GifModalProps) {
             src={artErr || !album.artworkUrl ? FALLBACK_IMG : album.artworkUrl}
             alt={album.title}
             fill
-            className="object-cover object-center"
+            className="object-contain"
             sizes="42vw"
             onError={() => setArtErr(true)}
           />
