@@ -1,5 +1,5 @@
 import { Feed } from "@/components/Feed";
-import { Logo } from "@/components/Logo";
+import Image from "next/image";
 import { MILES_DAVIS_DISCOGRAPHY } from "@/data/milesDavisDiscography";
 import type { Batch } from "@/types";
 
@@ -123,7 +123,16 @@ export default async function Home() {
       {/* Header */}
       <header className="flex items-center justify-between px-5 py-3 border-b border-zinc-900">
         <div className="flex items-center gap-2">
-          <Logo size={34} />
+          <div className="relative w-8 h-8 shrink-0">
+            <Image
+              src="/flockify.png"
+              alt="Flockify420 logo"
+              fill
+              className="object-cover object-left invert"
+              sizes="32px"
+            />
+            <span className="absolute bottom-0 right-0 text-[6px] text-white/40 font-mono leading-none">420</span>
+          </div>
           <span className="text-white font-bold text-sm tracking-wide">
             Flockify<span className="text-zinc-500 font-normal text-xs ml-0.5">4.2.0</span>
           </span>
