@@ -135,7 +135,7 @@ export function AlbumListCard({ album, allAlbums }: AlbumListCardProps) {
 
               {/* Description */}
               {album.description && (
-                <p className="mt-3 text-zinc-500 text-xs leading-relaxed line-clamp-3 italic">
+                <p className="mt-3 text-zinc-500 text-xs leading-relaxed italic">
                   {album.description}
                 </p>
               )}
