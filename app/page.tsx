@@ -1,6 +1,7 @@
 import { Feed } from "@/components/Feed";
 import { UsernameButton } from "@/components/UsernameButton";
 import { ResetFeedButton } from "@/components/ResetFeedButton";
+import { RandomAlbumButton } from "@/components/RandomAlbumButton";
 import { MILES_DAVIS_DISCOGRAPHY } from "@/data/milesDavisDiscography";
 import type { Batch } from "@/types";
 
@@ -160,6 +161,7 @@ export default async function Home() {
         <div />
 
         <div className="flex items-center gap-3 text-zinc-500">
+          <RandomAlbumButton albums={albums.filter((a) => !!a.description)} />
           <UsernameButton albumIds={albums.map((a) => a.id)} />
         </div>
       </header>
