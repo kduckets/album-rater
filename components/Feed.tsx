@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useMemo, useEffect, useRef } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { AlbumListCard } from "./AlbumListCard";
 import { AlbumGridCard } from "./AlbumGridCard";
 import { useAlbumStore } from "@/store/albumStore";
 import { useAveragesStore } from "@/store/averagesStore";
+import { getUsername } from "@/lib/identity";
 import type { Album, Batch, SortOrder, EraFilter } from "@/types";
 
 interface FeedProps {
@@ -65,20 +66,45 @@ export function Feed({ batches, allDiscography }: FeedProps) {
   const [searchQuery, setSearchQuery]   = useState("");
   const searchRef                       = useRef<HTMLInputElement>(null);
 
-  const ratings     = useAlbumStore((s) => s.ratings);
-  const comments    = useAlbumStore((s) => s.comments);
+  const ratings         = useAlbumStore((s) => s.ratings);
+  const comments        = useAlbumStore((s) => s.comments);
   const favoritedAlbums = useAlbumStore((s) => s.favoritedAlbums);
+  const loadRatings     = useAlbumStore((s) => s.loadRatings);
 
   const averages       = useAveragesStore((s) => s.averages);
   const lastCommentAt  = useAveragesStore((s) => s.lastCommentAt);
   const fetchAverages  = useAveragesStore((s) => s.fetchAverages);
 
   const batch      = batches[0];
-  const gridSource = batch.albums; // studio albums only in both views
+  const gridSource = batch.albums;
+  const albumIds   = gridSource.map((a) => a.id);
+
+  const refresh = useCallback(async () => {
+    fetchAverages(albumIds);
+    const username = getUsername();
+    if (username) {
+      try {
+        const res = await fetch("/api/my-ratings", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userId: username, albumIds }),
+        });
+        const data = await res.json();
+        if (data.ratings) loadRatings(data.ratings);
+      } catch { /* silent */ }
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
-    fetchAverages(gridSource.map((a) => a.id));
-  }, [gridSource, fetchAverages]);
+    refresh();
+  }, [refresh]);
+
+  useEffect(() => {
+    function onVisible() { if (document.visibilityState === "visible") refresh(); }
+    document.addEventListener("visibilitychange", onVisible);
+    return () => document.removeEventListener("visibilitychange", onVisible);
+  }, [refresh]);
 
   useEffect(() => {
     function reset() {
