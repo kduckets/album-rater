@@ -119,7 +119,7 @@ export function GifModal({ album, allAlbums, onClose }: GifModalProps) {
   }, [showRaters]);
 
   async function openRaters() {
-    setShowRaters((v) => !v);
+    setShowRaters(true);
     if (raters !== null) return;
     const res = await fetch(`/api/album-ratings?albumId=${encodeURIComponent(album.id)}`);
     const data = await res.json();
@@ -308,8 +308,13 @@ export function GifModal({ album, allAlbums, onClose }: GifModalProps) {
                   ))}
                 </div>
 
-                {/* Community average — clickable to see who rated */}
-                <div className="relative" ref={ratersRef}>
+                {/* Community average — hover to see who rated */}
+                <div
+                  className="relative"
+                  ref={ratersRef}
+                  onMouseEnter={openRaters}
+                  onMouseLeave={() => setShowRaters(false)}
+                >
                   <button
                     onClick={openRaters}
                     className="flex items-center gap-1.5 cursor-pointer group"

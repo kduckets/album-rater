@@ -86,7 +86,7 @@ export function AlbumListCard({ album, allAlbums }: AlbumListCardProps) {
   }, [showRaters]);
 
   async function openRaters() {
-    setShowRaters((v) => !v);
+    setShowRaters(true);
     if (raters !== null) return;
     const res = await fetch(`/api/album-ratings?albumId=${encodeURIComponent(album.id)}`);
     const data = await res.json();
@@ -183,7 +183,12 @@ export function AlbumListCard({ album, allAlbums }: AlbumListCardProps) {
           {/* Action strip */}
           <div className="w-12 sm:w-14 shrink-0 flex flex-col items-center py-4 gap-4 bg-zinc-100 border-l border-zinc-200">
             {/* Community average */}
-            <div className="flex flex-col items-center gap-1.5 relative" ref={popoverRef}>
+            <div
+              className="flex flex-col items-center gap-1.5 relative"
+              ref={popoverRef}
+              onMouseEnter={openRaters}
+              onMouseLeave={() => setShowRaters(false)}
+            >
               <button
                 onClick={openRaters}
                 className="w-8 h-8 bg-black rounded-full flex items-center justify-center text-white text-sm font-bold shrink-0 cursor-pointer hover:bg-zinc-800 transition-colors"
