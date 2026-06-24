@@ -351,11 +351,21 @@ export function GifModal({ album, allAlbums, onClose }: GifModalProps) {
               {/* Action bar */}
               <div className="flex items-center gap-3">
                 <button className="text-zinc-500 hover:text-white transition-colors cursor-pointer" aria-label="Save"><SaveIcon /></button>
-                <button onClick={() => setRating(album.id, Math.min(5, rating + 1))} className="text-zinc-500 hover:text-white transition-colors cursor-pointer" aria-label="Rate up"><ChevronUp /></button>
+                <button
+                  onClick={() => hasSetUsername() && setRating(album.id, Math.min(5, rating + 1))}
+                  className={`transition-colors cursor-pointer ${hasSetUsername() ? "text-zinc-500 hover:text-white" : "text-zinc-800 cursor-not-allowed"}`}
+                  aria-label="Rate up"
+                  title={!hasSetUsername() ? "Set a username to rate" : undefined}
+                ><ChevronUp /></button>
                 <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center text-black text-sm font-bold shrink-0 select-none">
                   {rating > 0 ? rating : "—"}
                 </div>
-                <button onClick={() => setRating(album.id, Math.max(0, rating - 1))} className="text-zinc-500 hover:text-white transition-colors cursor-pointer" aria-label="Rate down"><ChevronDn /></button>
+                <button
+                  onClick={() => hasSetUsername() && setRating(album.id, Math.max(0, rating - 1))}
+                  className={`transition-colors cursor-pointer ${hasSetUsername() ? "text-zinc-500 hover:text-white" : "text-zinc-800 cursor-not-allowed"}`}
+                  aria-label="Rate down"
+                  title={!hasSetUsername() ? "Set a username to rate" : undefined}
+                ><ChevronDn /></button>
                 <button className="text-zinc-500 hover:text-white transition-colors cursor-pointer" aria-label="Flag"><FlagIcon /></button>
 
                 {/* Streaming links */}

@@ -5,7 +5,9 @@ export async function POST(req: NextRequest) {
   const { albumId, userId, rating } = await req.json() as {
     albumId: string; userId: string; rating: number;
   };
-  if (!albumId || !userId) return NextResponse.json({ error: "missing fields" }, { status: 400 });
+  const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (!albumId || !userId || UUID_RE.test(userId))
+    return NextResponse.json({ error: "username required to rate" }, { status: 403 });
 
   const key = `r:${albumId}`;
   const cmd = rating === 0
