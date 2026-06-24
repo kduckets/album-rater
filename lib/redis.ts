@@ -25,10 +25,10 @@ export function parseHgetall(arr: unknown): Record<string, string> {
   return result;
 }
 
-// Compute average from a HGETALL result (values are "1"–"5")
+// Compute average from a HGETALL result (values are 0–100)
 export function avgFromHgetall(arr: unknown): number | null {
   const map = parseHgetall(arr);
-  const vals = Object.values(map).map(Number).filter((n) => n >= 1 && n <= 5);
+  const vals = Object.values(map).map(Number).filter((n) => !isNaN(n) && n > 0 && n <= 100);
   if (vals.length === 0) return null;
-  return Math.round((vals.reduce((a, b) => a + b, 0) / vals.length) * 10) / 10;
+  return Math.round(vals.reduce((a, b) => a + b, 0) / vals.length);
 }

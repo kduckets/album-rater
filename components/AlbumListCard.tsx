@@ -170,11 +170,8 @@ export function AlbumListCard({ album, allAlbums }: AlbumListCardProps) {
                 </p>
               )}
 
-              {/* Star rating */}
+              {/* Rating slider */}
               <div className="mt-4">
-                <p className="text-[10px] uppercase tracking-widest text-zinc-400 mb-1.5 font-semibold">
-                  Your rating
-                </p>
                 <InlineStarRating albumId={album.id} />
               </div>
             </div>
