@@ -19,21 +19,21 @@ export const metadata: Metadata = {
   },
   description: "Like Flockify, but different.",
   icons: {
-    icon: "/flockify-icon-new.png",
-    apple: "/flockify-icon-new.png",
+    icon: "/flockify-icon-only.png",
+    apple: "/flockify-icon-only.png",
   },
   openGraph: {
     title: "Flockify 4.2.0",
     description: "Like Flockify, but different.",
     siteName: "Flockify 4.2.0",
     type: "website",
-    images: [{ url: "/flockify-icon-new.png" }],
+    images: [{ url: "/flockify-icon-only.png" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Flockify 4.2.0",
     description: "Like Flockify, but different.",
-    images: ["/flockify-icon-new.png"],
+    images: ["/flockify-icon-only.png"],
   },
 };
 
