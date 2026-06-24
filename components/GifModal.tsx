@@ -163,7 +163,7 @@ export function GifModal({ album, allAlbums, onClose }: GifModalProps) {
         {/* ── Right: details panel ── */}
         <div className="flex-1 bg-black text-white flex flex-col overflow-hidden min-h-0">
 
-          <div className="flex-1 overflow-y-auto px-6 pb-8 space-y-5">
+          <div className="flex-1 overflow-y-auto px-6 pt-4 pb-8 space-y-5">
 
             {/* Title + meta */}
             <div>
@@ -273,7 +273,7 @@ export function GifModal({ album, allAlbums, onClose }: GifModalProps) {
                   )}
 
                   {!searching && results.length > 0 && (
-                    <div className="grid grid-cols-4 gap-1.5 max-h-64 overflow-y-auto">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                       {results.map((gif) => (
                         <button
                           key={gif.id}
