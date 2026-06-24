@@ -21,7 +21,6 @@ export function AlbumListCard({ album, rank }: AlbumListCardProps) {
     (s) => (s.comments[album.id] ?? []).length
   );
   const rating = useAlbumStore((s) => s.ratings[album.id] ?? 0);
-  const setRating = useAlbumStore((s) => s.setRating);
 
   const spotifyUrl = `https://open.spotify.com/search/${encodeURIComponent(
     `${album.title} Miles Davis`
@@ -97,7 +96,10 @@ export function AlbumListCard({ album, rank }: AlbumListCardProps) {
             </div>
 
             {/* Star rating */}
-            <div className="mt-3">
+            <div className="mt-4">
+              <p className="text-[10px] uppercase tracking-widest text-zinc-400 mb-1.5 font-semibold">
+                Your rating
+              </p>
               <InlineStarRating albumId={album.id} />
             </div>
           </div>
@@ -110,33 +112,11 @@ export function AlbumListCard({ album, rank }: AlbumListCardProps) {
         </div>
 
         {/* Action strip */}
-        <div className="w-12 sm:w-14 shrink-0 flex flex-col items-center py-4 gap-4 bg-zinc-100 border-l border-zinc-200">
+        <div className="w-12 sm:w-14 shrink-0 flex flex-col items-center py-4 gap-5 bg-zinc-100 border-l border-zinc-200">
           {/* Rank */}
           <div className="w-7 h-7 sm:w-8 sm:h-8 bg-black rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0">
             {rank}
           </div>
-
-          {/* Rate up */}
-          <button
-            onClick={() => setRating(album.id, Math.min(5, rating + 1))}
-            className="text-zinc-400 hover:text-zinc-800 transition-colors cursor-pointer text-lg leading-none"
-            aria-label="Rate up"
-            title={`Rate up (current: ${rating}/5)`}
-          >
-            ↑
-          </button>
-
-          {/* Rate down */}
-          <button
-            onClick={() =>
-              setRating(album.id, Math.max(0, rating - 1))
-            }
-            className="text-zinc-400 hover:text-zinc-800 transition-colors cursor-pointer text-lg leading-none"
-            aria-label="Rate down"
-            title={`Rate down (current: ${rating}/5)`}
-          >
-            ↓
-          </button>
 
           {/* GIF comments */}
           <button
