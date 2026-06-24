@@ -9,11 +9,12 @@ import type { Album } from "@/types";
 
 interface AlbumListCardProps {
   album: Album;
+  allAlbums: Album[];
 }
 
 const FALLBACK_IMG = "/miles-davis.png";
 
-export function AlbumListCard({ album }: AlbumListCardProps) {
+export function AlbumListCard({ album, allAlbums }: AlbumListCardProps) {
   const [gifModalOpen, setGifModalOpen] = useState(false);
   const [artworkError, setArtworkError] = useState(false);
   const commentCount = useAlbumStore(
@@ -33,7 +34,7 @@ export function AlbumListCard({ album }: AlbumListCardProps) {
           href={spotifyUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="relative w-[42%] sm:w-[38%] shrink-0 min-h-[200px] sm:min-h-[240px] overflow-hidden block"
+          className="relative w-[42%] sm:w-[38%] shrink-0 min-h-50 sm:min-h-60 overflow-hidden block"
           aria-label={`Listen to ${album.title} on Spotify`}
         >
           {album.artworkUrl && !artworkError ? (
@@ -157,7 +158,7 @@ export function AlbumListCard({ album }: AlbumListCardProps) {
       </div>
 
       {gifModalOpen && (
-        <GifModal album={album} onClose={() => setGifModalOpen(false)} />
+        <GifModal album={album} allAlbums={allAlbums} onClose={() => setGifModalOpen(false)} />
       )}
     </>
   );

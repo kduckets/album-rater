@@ -2,6 +2,8 @@ import { Feed } from "@/components/Feed";
 import { MILES_DAVIS_DISCOGRAPHY } from "@/data/milesDavisDiscography";
 import type { Batch } from "@/types";
 
+const LASTFM_KEY = "5f3f26020d42b6c407e571e17c6e493f";
+
 function normalizeTitle(t: string) {
   return t
     .toLowerCase()
@@ -27,26 +29,52 @@ async function fetchItunesArtwork(): Promise<Map<string, string>> {
       }
     }
   } catch {
-    // fall through — all albums will use the photo fallback
+    // fall through — all albums will use Last.fm or photo fallback
   }
   return map;
+}
+
+async function fetchLastFmImage(title: string): Promise<string> {
+  try {
+    const url =
+      `https://ws.audioscrobbler.com/2.0/?method=album.getinfo` +
+      `&artist=Miles+Davis&album=${encodeURIComponent(title)}` +
+      `&api_key=${LASTFM_KEY}&format=json`;
+    const res = await fetch(url, { next: { revalidate: 86400 } });
+    if (!res.ok) return "";
+    const data = await res.json();
+    const images: Array<{ "#text": string; size: string }> = data.album?.image ?? [];
+    for (const size of ["extralarge", "mega", "large"]) {
+      const img = images.find((i) => i.size === size);
+      if (img?.["#text"]) return img["#text"];
+    }
+  } catch {
+    // fall through
+  }
+  return "";
 }
 
 export default async function Home() {
   const artworkMap = await fetchItunesArtwork();
 
-  const albums = MILES_DAVIS_DISCOGRAPHY.filter((e) => e.type === "studio").map((entry, i) => {
-    const key = normalizeTitle(entry.title);
-    return {
-      id: `md-${i}`,
-      title: entry.title,
-      year: entry.year,
-      batchId: "miles-davis",
-      artworkUrl: artworkMap.get(key) ?? "",
-      label: entry.label,
-      type: entry.type,
-    };
-  });
+  const studioAlbums = MILES_DAVIS_DISCOGRAPHY.filter((e) => e.type === "studio");
+
+  // Fetch Last.fm in parallel for albums iTunes doesn't have
+  const missingAlbums = studioAlbums.filter((e) => !artworkMap.has(normalizeTitle(e.title)));
+  const lastFmResults = await Promise.all(
+    missingAlbums.map(async (e) => ({ title: e.title, url: await fetchLastFmImage(e.title) }))
+  );
+  const lastFmMap = new Map(lastFmResults.filter((r) => r.url).map((r) => [r.title, r.url]));
+
+  const albums = studioAlbums.map((entry, i) => ({
+    id: `md-${i}`,
+    title: entry.title,
+    year: entry.year,
+    batchId: "miles-davis",
+    artworkUrl: artworkMap.get(normalizeTitle(entry.title)) ?? lastFmMap.get(entry.title) ?? "",
+    label: entry.label,
+    type: entry.type,
+  }));
 
   const batches: Batch[] = [
     {

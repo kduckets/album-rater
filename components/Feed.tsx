@@ -117,8 +117,8 @@ export function Feed({ batches }: FeedProps) {
             No studio albums in this era.
           </div>
         ) : (
-          filteredAndSorted.map((album, index) => (
-            <AlbumListCard key={album.id} album={album} />
+          filteredAndSorted.map((album) => (
+            <AlbumListCard key={album.id} album={album} allAlbums={batch.albums} />
           ))
         )}
       </div>
