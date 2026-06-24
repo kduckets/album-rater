@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { InlineStarRating } from "./InlineStarRating";
 import { GifModal } from "./GifModal";
@@ -21,6 +21,24 @@ export function AlbumListCard({ album, allAlbums }: AlbumListCardProps) {
     (s) => (s.comments[album.id] ?? []).length
   );
   const rating = useAlbumStore((s) => s.ratings[album.id] ?? 0);
+
+  // Animate the score circle counting up/down to the new rating
+  const [displayRating, setDisplayRating] = useState(0);
+  const animRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  useEffect(() => {
+    if (animRef.current) clearInterval(animRef.current);
+    if (rating === displayRating) return;
+    const step = rating > displayRating ? 1 : -1;
+    animRef.current = setInterval(() => {
+      setDisplayRating((prev) => {
+        const next = prev + step;
+        if (next === rating) clearInterval(animRef.current!);
+        return next;
+      });
+    }, 80);
+    return () => { if (animRef.current) clearInterval(animRef.current); };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rating]);
 
   const spotifyUrl = `https://open.spotify.com/search/${encodeURIComponent(
     `${album.title} Miles Davis`
@@ -125,8 +143,8 @@ export function AlbumListCard({ album, allAlbums }: AlbumListCardProps) {
         <div className="w-12 sm:w-14 shrink-0 flex flex-col items-center py-4 gap-4 bg-zinc-100 border-l border-zinc-200">
           {/* Average rating */}
           <div className="flex flex-col items-center gap-1.5">
-            <div className="w-8 h-8 bg-black rounded-full flex items-center justify-center text-white text-sm font-bold shrink-0">
-              {rating > 0 ? rating : "—"}
+            <div className="w-8 h-8 bg-black rounded-full flex items-center justify-center text-white text-sm font-bold shrink-0 transition-transform duration-75">
+              {displayRating > 0 ? displayRating : "—"}
             </div>
             <div className="flex">
               {[1, 2, 3, 4, 5].map((s) => (
