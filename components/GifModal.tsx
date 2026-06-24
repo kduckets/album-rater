@@ -59,7 +59,9 @@ export function GifModal({ album, allAlbums, onClose }: GifModalProps) {
   const setCommentCount   = useAveragesStore((s) => s.setCommentCount);
   const setLastCommentAt  = useAveragesStore((s) => s.setLastCommentAt);
 
-  const visitorId  = getVisitorId();
+  const visitorId     = getVisitorId();
+  const spotifyUrl    = `https://open.spotify.com/search/${encodeURIComponent(`${album.title} Miles Davis`)}`;
+  const appleMusicUrl = `https://music.apple.com/search?term=${encodeURIComponent(`${album.title} Miles Davis`)}`;
 
   // Fetch comments from server on mount
   useEffect(() => {
@@ -81,8 +83,6 @@ export function GifModal({ album, allAlbums, onClose }: GifModalProps) {
   useEffect(() => { if (addMode === "search") searchRef.current?.focus(); }, [addMode]);
   useEffect(() => { if (addMode === "paste")  pasteRef.current?.focus();  }, [addMode]);
   useEffect(() => { if (addMode === "name-prompt") nameRef.current?.focus(); }, [addMode]);
-
-  const spotifyUrl = `https://open.spotify.com/search/${encodeURIComponent(`${album.title} Miles Davis`)}`;
 
   const related = allAlbums
     .filter((a) => a.id !== album.id && a.artworkUrl)
@@ -229,13 +229,7 @@ export function GifModal({ album, allAlbums, onClose }: GifModalProps) {
         <div className="flex flex-col sm:flex-row flex-1 overflow-hidden min-h-0">
 
           {/* Album art */}
-          <a
-            href={spotifyUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="relative w-full aspect-square sm:w-[42%] shrink-0 bg-black sm:self-start"
-            aria-label={`Listen to ${album.title} on Spotify`}
-          >
+          <div className="relative w-full aspect-square sm:w-[42%] shrink-0 bg-black sm:self-start">
             <Image
               src={artErr || !album.artworkUrl ? FALLBACK_IMG : album.artworkUrl}
               alt={album.title}
@@ -244,7 +238,7 @@ export function GifModal({ album, allAlbums, onClose }: GifModalProps) {
               sizes="(max-width: 640px) 100vw, 42vw"
               onError={() => setArtErr(true)}
             />
-          </a>
+          </div>
 
           {/* Details panel */}
           <div className="flex-1 bg-black text-white flex flex-col overflow-hidden min-h-0">
@@ -252,14 +246,9 @@ export function GifModal({ album, allAlbums, onClose }: GifModalProps) {
 
               {/* Title + meta */}
               <div>
-                <a
-                  href={spotifyUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-[#4a90d9] font-semibold text-sm leading-snug hover:underline block"
-                >
+                <p className="text-[#4a90d9] font-semibold text-sm leading-snug">
                   Miles Davis – {album.title}{album.year ? ` (${album.year})` : ""}
-                </a>
+                </p>
                 <p className="text-zinc-500 text-xs mt-1">
                   posted by <span className="text-zinc-300">Johnson</span> &nbsp;·&nbsp; {album.year || "—"}
                 </p>
@@ -281,6 +270,36 @@ export function GifModal({ album, allAlbums, onClose }: GifModalProps) {
                 </div>
                 <button onClick={() => setRating(album.id, Math.max(0, rating - 1))} className="text-zinc-500 hover:text-white transition-colors cursor-pointer" aria-label="Rate down"><ChevronDn /></button>
                 <button className="text-zinc-500 hover:text-white transition-colors cursor-pointer" aria-label="Flag"><FlagIcon /></button>
+
+                {/* Streaming links */}
+                <div className="ml-auto flex items-center gap-2">
+                  <a
+                    href={spotifyUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-zinc-600 hover:text-[#1DB954] transition-colors"
+                    aria-label="Open in Spotify"
+                    title="Open in Spotify"
+                  >
+                    {/* Spotify icon */}
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/>
+                    </svg>
+                  </a>
+                  <a
+                    href={appleMusicUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-zinc-600 hover:text-[#fc3c44] transition-colors"
+                    aria-label="Open in Apple Music"
+                    title="Open in Apple Music"
+                  >
+                    {/* Apple Music icon */}
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M23.994 6.124a9.23 9.23 0 00-.24-2.19c-.317-1.31-1.062-2.31-2.18-3.043a5.022 5.022 0 00-1.877-.726 10.496 10.496 0 00-1.564-.15c-.04-.003-.083-.01-.124-.013H5.986c-.152.01-.303.017-.455.026C4.786.07 4.043.15 3.34.428 2.004.958 1.04 1.88.475 3.208c-.192.448-.292.925-.363 1.408-.056.392-.088.785-.1 1.18 0 .032-.007.062-.01.093v12.223c.01.14.017.283.027.424.05.815.154 1.624.497 2.373.65 1.42 1.738 2.353 3.234 2.801.42.127.856.187 1.293.228.555.053 1.11.06 1.667.06h11.03a12.5 12.5 0 001.57-.1 5.338 5.338 0 001.98-.68 4.86 4.86 0 001.89-2.041c.28-.528.43-1.098.51-1.686.07-.5.1-1.003.1-1.507V6.57c0-.15-.003-.298-.013-.446zm-4.518 5.117l-5.002 2.902a1.35 1.35 0 01-.666.178 1.372 1.372 0 01-1.372-1.373V7.028a1.372 1.372 0 012.038-1.197l5.002 2.9a1.375 1.375 0 010 2.51z"/>
+                    </svg>
+                  </a>
+                </div>
               </div>
 
               <hr className="border-zinc-800" />

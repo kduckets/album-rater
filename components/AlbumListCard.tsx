@@ -75,13 +75,11 @@ export function AlbumListCard({ album, allAlbums }: AlbumListCardProps) {
   return (
     <>
       <div className="flex flex-col sm:flex-row group overflow-hidden rounded sm:rounded-none">
-        {/* Album art */}
-        <a
-          href={spotifyUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="relative w-full aspect-square sm:aspect-auto sm:w-[38%] sm:min-h-60 shrink-0 overflow-hidden block"
-          aria-label={`Listen to ${album.title} on Spotify`}
+        {/* Album art — click opens comments modal */}
+        <button
+          onClick={() => setGifModalOpen(true)}
+          className="relative w-full aspect-square sm:aspect-auto sm:w-[38%] sm:min-h-60 shrink-0 overflow-hidden block cursor-pointer"
+          aria-label={`Open comments for ${album.title}`}
         >
           {album.artworkUrl && !artworkError ? (
             <Image
@@ -101,7 +99,7 @@ export function AlbumListCard({ album, allAlbums }: AlbumListCardProps) {
               sizes="(max-width: 640px) 100vw, 38vw"
             />
           )}
-        </a>
+        </button>
 
         {/* Content + action strip */}
         <div className="flex flex-1 min-w-0">
