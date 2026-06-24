@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { AlbumListCard } from "./AlbumListCard";
 import { useAlbumStore } from "@/store/albumStore";
+import { useAveragesStore } from "@/store/averagesStore";
 import type { Batch, SortOrder, EraFilter } from "@/types";
 
 interface FeedProps {
@@ -41,7 +42,15 @@ export function Feed({ batches }: FeedProps) {
   const ratings  = useAlbumStore((s) => s.ratings);
   const comments = useAlbumStore((s) => s.comments);
 
+  const averages      = useAveragesStore((s) => s.averages);
+  const fetchAverages = useAveragesStore((s) => s.fetchAverages);
+
   const batch = batches[0];
+
+  // Fetch community averages once on mount
+  useEffect(() => {
+    fetchAverages(batch.albums.map((a) => a.id));
+  }, [batch.albums, fetchAverages]);
 
   const filteredAndSorted = useMemo(() => {
     const filtered = batch.albums.filter((a) =>
@@ -51,12 +60,12 @@ export function Feed({ batches }: FeedProps) {
     return [...filtered].sort((a, b) => {
       switch (sortOrder) {
         case "new":      return b.year - a.year;
-        case "top":      return (ratings[b.id]  ?? 0) - (ratings[a.id]  ?? 0);
+        case "top":      return (averages[b.id] ?? 0) - (averages[a.id] ?? 0);
         case "comments": return (comments[b.id]?.length ?? 0) - (comments[a.id]?.length ?? 0);
         case "stars":    return a.year - b.year;
       }
     });
-  }, [batch.albums, eraFilter, sortOrder, ratings, comments]);
+  }, [batch.albums, eraFilter, sortOrder, averages, comments]);
 
   const ratedCount = batch.albums.filter((a) => ratings[a.id]).length;
   const totalGifs  = Object.values(comments).reduce((n, arr) => n + arr.length, 0);
