@@ -10,7 +10,7 @@ export async function POST(req: NextRequest) {
   const ratings: Record<string, number> = {};
   albumIds.forEach((id, i) => {
     const val = Number(results[i]?.result);
-    if (val >= 1 && val <= 5) ratings[id] = val;
+    if (val > 0 && val <= 100) ratings[id] = val;
   });
 
   return NextResponse.json({ ratings });

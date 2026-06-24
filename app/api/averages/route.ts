@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
     // Count valid raters from the same HGETALL
     if (Array.isArray(raw)) {
       let n = 0;
-      for (let j = 1; j < raw.length; j += 2) { const v = Number(raw[j]); if (v >= 1 && v <= 5) n++; }
+      for (let j = 1; j < raw.length; j += 2) { const v = Number(raw[j]); if (v > 0 && v <= 100) n++; }
       if (n > 0) raterCounts[id] = n;
     }
     const count = typeof results[i * 2 + 1]?.result === "number"

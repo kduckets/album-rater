@@ -11,7 +11,7 @@ export async function GET(req: NextRequest) {
   const ratings: Record<string, number> = {};
   for (const [userId, val] of Object.entries(raw)) {
     const n = Number(val);
-    if (n >= 1 && n <= 5) ratings[userId] = n;
+    if (n > 0 && n <= 100) ratings[userId] = n;
   }
 
   return NextResponse.json({ ratings });
