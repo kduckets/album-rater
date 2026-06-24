@@ -24,13 +24,7 @@ function timeAgo(ts: number) {
   return `${d} day${d > 1 ? "s" : ""} ago`;
 }
 
-function ChevronUp() { return <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="18 15 12 9 6 15"/></svg>; }
-function ChevronDn() { return <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"/></svg>; }
-function BookmarkIcon({ filled }: { filled: boolean }) {
-  return filled
-    ? <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
-    : <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>;
-}
+function SaveIcon() { return <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>; }
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-/i;
 function displayName(userId: string) { return UUID_RE.test(userId) ? "Anonymous" : userId; }
@@ -56,6 +50,7 @@ export function GifModal({ album: initialAlbum, allAlbums, onClose }: GifModalPr
   const [posting, setPosting]         = useState(false);
   const [showRaters, setShowRaters]   = useState(false);
   const [raters, setRaters]           = useState<{ userId: string; rating: number }[] | null>(null);
+  const [starHover, setStarHover]     = useState(0);
 
   function navigateTo(next: typeof initialAlbum) {
     setAlbum(next);
@@ -328,35 +323,37 @@ export function GifModal({ album: initialAlbum, allAlbums, onClose }: GifModalPr
                 </p>
               </div>
 
-              {/* Rating + action bar */}
+              {/* Stars (interactive rating) + action bar */}
               <div className="flex items-center gap-3">
-                {/* User rating */}
-                <button
-                  onClick={() => hasSetUsername() && setRating(album.id, Math.min(5, rating + 1))}
-                  className={`transition-colors cursor-pointer ${hasSetUsername() ? "text-zinc-500 hover:text-white" : "text-zinc-800 cursor-not-allowed"}`}
-                  aria-label="Rate up"
+                {/* Clickable stars */}
+                <div
+                  className="flex items-center gap-0.5"
+                  onMouseLeave={() => setStarHover(0)}
                   title={!hasSetUsername() ? "Set a username to rate" : undefined}
-                ><ChevronUp /></button>
-                <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center text-black text-sm font-bold shrink-0 select-none">
-                  {rating > 0 ? rating : "—"}
+                >
+                  {[1,2,3,4,5].map((s) => (
+                    <button
+                      key={s}
+                      onMouseEnter={() => hasSetUsername() && setStarHover(s)}
+                      onClick={() => hasSetUsername() && setRating(album.id, rating === s ? 0 : s)}
+                      className={`text-xl leading-none transition-transform focus:outline-none ${hasSetUsername() ? "cursor-pointer hover:scale-125" : "cursor-default"}`}
+                      aria-label={`Rate ${s} star${s > 1 ? "s" : ""}`}
+                    >
+                      <span className={(starHover || rating) >= s ? "text-amber-400" : "text-zinc-700"}>★</span>
+                    </button>
+                  ))}
                 </div>
-                <button
-                  onClick={() => hasSetUsername() && setRating(album.id, Math.max(0, rating - 1))}
-                  className={`transition-colors cursor-pointer ${hasSetUsername() ? "text-zinc-500 hover:text-white" : "text-zinc-800 cursor-not-allowed"}`}
-                  aria-label="Rate down"
-                  title={!hasSetUsername() ? "Set a username to rate" : undefined}
-                ><ChevronDn /></button>
 
                 {/* Community average — hover to see who rated */}
                 <div
-                  className="relative ml-1"
+                  className="relative"
                   ref={ratersRef}
                   onMouseEnter={openRaters}
                   onMouseLeave={() => setShowRaters(false)}
                 >
                   <button
                     onClick={openRaters}
-                    className="w-8 h-8 bg-amber-400 rounded-full flex items-center justify-center text-black text-sm font-bold shrink-0 cursor-pointer hover:bg-amber-300 transition-colors"
+                    className="w-8 h-8 bg-white rounded-full flex items-center justify-center text-black text-sm font-bold shrink-0 cursor-pointer hover:bg-zinc-200 transition-colors"
                     title={raterCount > 0 ? `Community avg · ${raterCount} rating${raterCount !== 1 ? "s" : ""}` : "No ratings yet"}
                   >
                     {average > 0 ? average.toFixed(1) : "—"}
@@ -394,7 +391,7 @@ export function GifModal({ album: initialAlbum, allAlbums, onClose }: GifModalPr
                   aria-label={isSaved ? "Remove from collection" : "Save to collection"}
                   title={!hasSetUsername() ? "Set a username to save" : isSaved ? "Remove from collection" : "Save to collection"}
                 >
-                  <BookmarkIcon filled={isSaved} />
+                  <SaveIcon />
                 </button>
 
                 {/* Streaming links */}
