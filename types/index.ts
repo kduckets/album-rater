@@ -1,3 +1,5 @@
+export type AlbumType = 'studio' | 'live' | 'compilation'
+
 export interface Album {
   id: string
   title: string
@@ -5,6 +7,7 @@ export interface Album {
   batchId: string
   artworkUrl: string
   label?: string
+  type: AlbumType
 }
 
 export interface Batch {
@@ -21,5 +24,6 @@ export interface GifComment {
   timestamp: number
 }
 
-export type SortOrder = 'new' | 'top' | 'comments' | 'stars'
-export type EraFilter = 'all' | '50s' | '60s' | '70s' | '80s+'
+export type SortOrder  = 'new' | 'top' | 'comments' | 'stars'
+export type EraFilter  = 'all' | '50s' | '60s' | '70s' | '80s' | '90s' | '2000s+'
+export type TypeFilter = 'all' | 'studio' | 'live' | 'compilation'

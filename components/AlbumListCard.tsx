@@ -89,6 +89,11 @@ export function AlbumListCard({ album, rank }: AlbumListCardProps) {
                   Fusion
                 </span>
               )}
+              {album.year >= 1951 && album.year <= 1961 && (
+                <span className="px-2 py-0.5 bg-zinc-200 text-zinc-600 text-xs rounded">
+                  Hard Bop
+                </span>
+              )}
             </div>
 
             {/* Star rating */}

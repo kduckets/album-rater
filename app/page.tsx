@@ -1,133 +1,59 @@
 import { Feed } from "@/components/Feed";
+import { MILES_DAVIS_DISCOGRAPHY } from "@/data/milesDavisDiscography";
 import type { Batch } from "@/types";
 
-const STUDIO_ALBUMS = [
-  "Birth of the Cool",
-  "Cookin' with the Miles Davis Quintet",
-  "Relaxin' with the Miles Davis Quintet",
-  "Milestones",
-  "Workin' with the Miles Davis Quintet",
-  "Kind of Blue",
-  "Sketches of Spain",
-  "Steamin' with the Miles Davis Quintet",
-  "Someday My Prince Will Come",
-  "Seven Steps to Heaven",
-  "E.S.P.",
-  "Miles Smiles",
-  "Sorcerer",
-  "Nefertiti",
-  "Filles de Kilimanjaro",
-  "In a Silent Way",
-  "Bitches Brew",
-  "A Tribute to Jack Johnson",
-  "On the Corner",
-  "Agharta",
-  "The Man with the Horn",
-  "Star People",
-  "Decoy",
-  "You're Under Arrest",
-  "Tutu",
-  "Amandla",
-  "Doo-Bop",
-];
-
-const LABELS: Record<string, string> = {
-  "Birth of the Cool": "Capitol",
-  "Cookin' with the Miles Davis Quintet": "Prestige",
-  "Relaxin' with the Miles Davis Quintet": "Prestige",
-  "Workin' with the Miles Davis Quintet": "Prestige",
-  "Steamin' with the Miles Davis Quintet": "Prestige",
-  "Tutu": "Warner Bros.",
-  "Amandla": "Warner Bros.",
-  "Doo-Bop": "Warner Bros.",
-};
-
-function normalizeTitle(title: string): string {
-  return title
+function normalizeTitle(t: string) {
+  return t
     .toLowerCase()
-    .replace(
-      /\s*[\(\[](remaster|deluxe|anniversary|edition|version|expanded|reissue|bonus)[^\)\]]*[\)\]]\s*/gi,
-      ""
-    )
+    .replace(/\s*[\(\[](remaster|deluxe|anniversary|edition|version|expanded|reissue|bonus)[^\)\]]*[\)\]]\s*/gi, "")
+    .replace(/[^a-z0-9 ]/g, "")
+    .replace(/\s+/g, " ")
     .trim();
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function matchesStudio(itunesTitle: string): string | null {
-  const norm = normalizeTitle(itunesTitle);
-  return STUDIO_ALBUMS.find((s) => normalizeTitle(s) === norm) ?? null;
-}
-
-async function getMilesDavisAlbums() {
+async function fetchItunesArtwork(): Promise<Map<string, string>> {
+  const map = new Map<string, string>();
   try {
     const res = await fetch(
       "https://itunes.apple.com/search?term=miles+davis&entity=album&attribute=artistTerm&limit=200&country=us"
     );
-    if (!res.ok) return [];
+    if (!res.ok) return map;
     const data = await res.json();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return data.results as any[];
+    for (const item of data.results) {
+      if (item.artistName?.toLowerCase() !== "miles davis") continue;
+      const key = normalizeTitle(item.collectionName ?? "");
+      if (key && item.artworkUrl100) {
+        map.set(key, item.artworkUrl100.replace("100x100bb", "600x600bb"));
+      }
+    }
   } catch {
-    return [];
+    // fall through — all albums will use the photo fallback
   }
+  return map;
 }
 
 export default async function Home() {
-  const itunesResults = await getMilesDavisAlbums();
+  const artworkMap = await fetchItunesArtwork();
 
-  const seen = new Set<string>();
-  const matched: {
-    canonicalTitle: string;
-    year: number;
-    artworkUrl: string;
-    id: string;
-  }[] = [];
-
-  for (const item of itunesResults) {
-    if (item.artistName?.toLowerCase() !== "miles davis") continue;
-    const canonical = matchesStudio(item.collectionName);
-    if (!canonical || seen.has(canonical)) continue;
-    seen.add(canonical);
-    matched.push({
-      canonicalTitle: canonical,
-      year: new Date(item.releaseDate).getFullYear(),
-      artworkUrl: item.artworkUrl100?.replace("100x100bb", "600x600bb") ?? "",
-      id: String(item.collectionId),
-    });
-  }
-
-  for (const title of STUDIO_ALBUMS) {
-    if (!seen.has(title)) {
-      matched.push({
-        canonicalTitle: title,
-        year: 0,
-        artworkUrl: "",
-        id: `fallback-${title}`,
-      });
-    }
-  }
-
-  matched.sort(
-    (a, b) =>
-      STUDIO_ALBUMS.indexOf(a.canonicalTitle) -
-      STUDIO_ALBUMS.indexOf(b.canonicalTitle)
-  );
-
-  const albums = matched.map((m) => ({
-    id: m.id,
-    title: m.canonicalTitle,
-    year: m.year,
-    batchId: "miles-davis",
-    artworkUrl: m.artworkUrl,
-    label: LABELS[m.canonicalTitle] ?? "Columbia",
-  }));
+  const albums = MILES_DAVIS_DISCOGRAPHY.filter((e) => e.type === "studio").map((entry, i) => {
+    const key = normalizeTitle(entry.title);
+    return {
+      id: `md-${i}`,
+      title: entry.title,
+      year: entry.year,
+      batchId: "miles-davis",
+      artworkUrl: artworkMap.get(key) ?? "",
+      label: entry.label,
+      type: entry.type,
+    };
+  });
 
   const batches: Batch[] = [
     {
       id: "miles-davis",
       name: "Miles Davis Discography",
       description:
-        "The complete studio discography of Miles Davis — jazz trumpeter, composer, and one of the most influential musicians of the 20th century.",
+        "The complete discography of Miles Davis — studio albums, live recordings, and compilations.",
       albums,
     },
   ];
@@ -136,7 +62,6 @@ export default async function Home() {
     <div className="min-h-screen bg-black">
       {/* Header */}
       <header className="flex items-center justify-between px-5 py-3 border-b border-zinc-900">
-        {/* Logo */}
         <div className="flex items-center gap-2">
           <div className="w-7 h-7 rounded-full bg-white flex items-center justify-center">
             <span className="text-black text-xs font-bold leading-none">♪</span>
@@ -146,25 +71,14 @@ export default async function Home() {
           </span>
         </div>
 
-        {/* Center: post an album */}
         <button className="flex items-center gap-2 text-zinc-400 hover:text-white transition-colors cursor-pointer text-sm">
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <rect x="3" y="3" width="18" height="18" rx="2" />
             <path d="M12 8v8M8 12h8" />
           </svg>
           <span className="text-xs tracking-wide">post an album</span>
         </button>
 
-        {/* Right icons */}
         <div className="flex items-center gap-3 text-zinc-500">
           <button className="hover:text-white transition-colors cursor-pointer" aria-label="Search">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
