@@ -1,6 +1,22 @@
 const DEVICE_KEY   = "f420-visitor-id";
 const USERNAME_KEY = "f420-username";
 const NAME_FLAG    = "f420-name-set";
+const AVATAR_KEY   = "f420-avatar";
+
+export const AVATARS = [
+  "🦆","🐸","🐙","🦊","🐮","🤖","👽","🦄",
+  "🐳","🦁","🐻","🐼","🎺","🥁","🎷","🐉",
+];
+
+export function getAvatar(): string {
+  if (typeof window === "undefined") return "";
+  return localStorage.getItem(AVATAR_KEY) ?? "";
+}
+
+export function setAvatar(emoji: string): void {
+  if (typeof window === "undefined") return;
+  localStorage.setItem(AVATAR_KEY, emoji);
+}
 
 function getDeviceId(): string {
   if (typeof window === "undefined") return "";
