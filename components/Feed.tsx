@@ -111,7 +111,7 @@ export function Feed({ batches }: FeedProps) {
       </div>
 
       {/* Album list */}
-      <div>
+      <div className="flex flex-col gap-3 py-3">
         {filteredAndSorted.length === 0 ? (
           <div className="text-center py-20 text-zinc-600 text-sm">
             No studio albums in this era.

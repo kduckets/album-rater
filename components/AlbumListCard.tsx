@@ -28,7 +28,7 @@ export function AlbumListCard({ album, allAlbums }: AlbumListCardProps) {
 
   return (
     <>
-      <div className="flex flex-col sm:flex-row border-b border-zinc-900 group">
+      <div className="flex flex-col sm:flex-row group">
         {/* Album art — full width square on mobile, fixed column on sm+ */}
         <a
           href={spotifyUrl}
