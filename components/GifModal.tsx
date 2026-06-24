@@ -359,7 +359,7 @@ export function GifModal({ album: initialAlbum, allAlbums, onClose }: GifModalPr
                   )}
 
                   {showRaters && (
-                    <div className="absolute left-0 top-full mt-6 z-50 w-48 bg-zinc-950 border border-zinc-800 rounded-lg shadow-2xl py-2">
+                    <div className="absolute right-0 top-full mt-6 z-50 w-48 bg-zinc-950 border border-zinc-800 rounded-lg shadow-2xl py-2">
                       {raters === null ? (
                         <p className="px-3 py-1 text-zinc-600 text-xs">Loading…</p>
                       ) : raters.length === 0 ? (
