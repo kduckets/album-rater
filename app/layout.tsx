@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "AlbumRater",
+  title: "Flockify",
   description: "Rate music albums and react with GIFs",
 };
 

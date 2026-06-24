@@ -95,7 +95,7 @@ export default async function Home() {
             <span className="text-black text-xs font-bold leading-none">♪</span>
           </div>
           <span className="text-white font-bold text-sm tracking-wide hidden sm:block">
-            AlbumRater
+            Flockify <span className="text-zinc-600 font-normal text-xs">4.2.0</span>
           </span>
         </div>
 
