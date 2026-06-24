@@ -84,6 +84,11 @@ export function GifModal({ album: initialAlbum, allAlbums, onClose }: GifModalPr
 
   // Persist rating changes to Redis
   const prevRating = useRef<number | null>(null);
+  useEffect(() => {
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = ""; };
+  }, []);
+
   useEffect(() => { prevRating.current = null; }, [album.id]);
   useEffect(() => {
     if (prevRating.current === null) { prevRating.current = rating; return; }
