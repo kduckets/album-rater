@@ -171,7 +171,8 @@ export function Feed({ batches, allDiscography }: FeedProps) {
     });
   }, [gridSource, eraFilter, labelFilter, statusFilter, sortOrder, sortDir, averages, lastCommentAt, ratings, favoritedAlbums, searchLower]);
 
-  const ratedCount = batch.albums.filter((a) => ratings[a.id]).length;
+  const reviewedCount = batch.albums.filter((a) => !!a.description).length;
+  const ratedCount    = batch.albums.filter((a) => ratings[a.id]).length;
   const totalGifs  = Object.values(comments).reduce((n, arr) => n + arr.length, 0);
 
   return (
@@ -204,7 +205,7 @@ export function Feed({ batches, allDiscography }: FeedProps) {
               <button
                 onClick={() => { setEraFilter("all"); setStatusFilter("all"); }}
                 className={`cursor-pointer transition-colors hover:text-zinc-300 ${statusFilter === "all" ? "text-white" : "text-zinc-600"}`}
-              >{filteredAndSorted.length} albums</button>
+              >{reviewedCount} albums</button>
               {ratedCount > 0 && (
                 <button
                   onClick={() => setStatusFilter(statusFilter === "rated" ? "all" : "rated")}
