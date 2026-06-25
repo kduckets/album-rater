@@ -9,6 +9,7 @@ export interface Album {
   label?: string
   type: AlbumType
   description?: string
+  postOrder?: number
 }
 
 export interface Batch {

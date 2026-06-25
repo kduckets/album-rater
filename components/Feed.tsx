@@ -137,7 +137,7 @@ export function Feed({ batches, allDiscography }: FeedProps) {
     const dir = sortDir === "desc" ? 1 : -1;
     return [...filtered].sort((a, b) => {
       switch (sortOrder) {
-        case "new":      return dir * (b.year - a.year);
+        case "new":      return dir * ((b.postOrder ?? -1) - (a.postOrder ?? -1));
         case "top":      return dir * ((averages[b.id] ?? 0) - (averages[a.id] ?? 0));
         case "comments": return dir * ((lastCommentAt[b.id] ?? 0) - (lastCommentAt[a.id] ?? 0));
       }
@@ -164,7 +164,7 @@ export function Feed({ batches, allDiscography }: FeedProps) {
     const dir = sortDir === "desc" ? 1 : -1;
     return [...list].sort((a, b) => {
       switch (sortOrder) {
-        case "new":      return dir * (b.year - a.year);
+        case "new":      return dir * ((b.postOrder ?? -1) - (a.postOrder ?? -1));
         case "top":      return dir * ((averages[b.id] ?? 0) - (averages[a.id] ?? 0));
         case "comments": return dir * ((lastCommentAt[b.id] ?? 0) - (lastCommentAt[a.id] ?? 0));
       }

@@ -26,35 +26,37 @@ function normalizeForDesc(t: string) {
     .trim();
 }
 
-async function fetchDescriptions(): Promise<Map<string, string>> {
-  const map = new Map<string, string>();
+type DescEntry = { notes: string; order: number };
+
+async function fetchDescriptions(): Promise<Map<string, DescEntry>> {
+  const map = new Map<string, DescEntry>();
   try {
     const res = await fetch("https://cmurray1221.github.io/posts.json", {
       next: { revalidate: 3600 },
     });
     if (!res.ok) return map;
     const posts: Array<{ title: string; year: number; notes: string }> = await res.json();
-    for (const post of posts) {
+    posts.forEach((post, i) => {
       const key = `${post.year}-${normalizeForDesc(post.title)}`;
       const notes = post.notes.replace(/^-\s*/, "").trim();
-      map.set(key, notes);
-    }
+      map.set(key, { notes, order: i });
+    });
   } catch { /* fall through */ }
   return map;
 }
 
 // Fuzzy description lookup: exact → prefix → space-collapsed substring
-function findDesc(descMap: Map<string, string>, year: number, title: string): string | undefined {
+function findDesc(descMap: Map<string, DescEntry>, year: number, title: string): DescEntry | undefined {
   const norm = normalizeForDesc(title);
   const exact = descMap.get(`${year}-${norm}`);
   if (exact) return exact;
   const normNoSpaces = norm.replace(/ /g, "");
-  for (const [key, notes] of descMap) {
+  for (const [key, entry] of descMap) {
     const dash = key.indexOf("-");
     if (parseInt(key.slice(0, dash)) !== year) continue;
     const keyTitle = key.slice(dash + 1);
-    if (keyTitle.startsWith(norm)) return notes;
-    if (normNoSpaces.length >= 5 && keyTitle.replace(/ /g, "").includes(normNoSpaces)) return notes;
+    if (keyTitle.startsWith(norm)) return entry;
+    if (normNoSpaces.length >= 5 && keyTitle.replace(/ /g, "").includes(normNoSpaces)) return entry;
   }
   return undefined;
 }
@@ -116,31 +118,39 @@ export default async function Home() {
   const lastFmMap = new Map(lastFmResults.filter((r) => r.url).map((r) => [r.title, r.url]));
 
   // Studio albums (Classic view) — IDs are stable: md-{studio-index}
-  const albums = studioAlbums.map((entry, i) => ({
-    id: `md-${i}`,
-    title: entry.title,
-    year: entry.year,
-    batchId: "miles-davis",
-    artworkUrl: artworkMap.get(normalizeTitle(entry.title)) ?? lastFmMap.get(entry.title) ?? "",
-    label: entry.label,
-    type: entry.type,
-    description: findDesc(descMap, entry.year, entry.title),
-  }));
+  const albums = studioAlbums.map((entry, i) => {
+    const desc = findDesc(descMap, entry.year, entry.title);
+    return {
+      id: `md-${i}`,
+      title: entry.title,
+      year: entry.year,
+      batchId: "miles-davis",
+      artworkUrl: artworkMap.get(normalizeTitle(entry.title)) ?? lastFmMap.get(entry.title) ?? "",
+      label: entry.label,
+      type: entry.type,
+      description: desc?.notes,
+      postOrder: desc?.order,
+    };
+  });
 
   // Stable ID map so studio albums share IDs in both views
   const studioIdMap = new Map(albums.map((a) => [a.title, a.id]));
 
   // Full discography (Grid view) — uses same IDs for studio, new IDs for live/compilation
-  const allDiscography = MILES_DAVIS_DISCOGRAPHY.map((entry, i) => ({
-    id: studioIdMap.get(entry.title) ?? `mdx-${i}`,
-    title: entry.title,
-    year: entry.year,
-    batchId: "miles-davis",
-    artworkUrl: artworkMap.get(normalizeTitle(entry.title)) ?? "",
-    label: entry.label,
-    type: entry.type,
-    description: findDesc(descMap, entry.year, entry.title),
-  }));
+  const allDiscography = MILES_DAVIS_DISCOGRAPHY.map((entry, i) => {
+    const desc = findDesc(descMap, entry.year, entry.title);
+    return {
+      id: studioIdMap.get(entry.title) ?? `mdx-${i}`,
+      title: entry.title,
+      year: entry.year,
+      batchId: "miles-davis",
+      artworkUrl: artworkMap.get(normalizeTitle(entry.title)) ?? "",
+      label: entry.label,
+      type: entry.type,
+      description: desc?.notes,
+      postOrder: desc?.order,
+    };
+  });
 
   const batches: Batch[] = [
     {
