@@ -450,7 +450,10 @@ export function GifModal({ album: initialAlbum, allAlbums, onClose }: GifModalPr
                         <img src={c.gifUrl} alt="GIF" className="w-full h-full object-cover" />
                       </div>
                       <div className="flex flex-col justify-between h-28 min-w-0">
-                        <span className="text-xl select-none">👍</span>
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-zinc-600 shrink-0 mt-0.5">
+                          <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/>
+                          <path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/>
+                        </svg>
                         <div>
                           <p className="text-zinc-500 text-xs">
                             <span className="text-zinc-300">{c.author || "Anonymous"}</span>
